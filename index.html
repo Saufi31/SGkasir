@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>SGkasir</title>
+<link rel="icon" href="logo.png" />
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007bff">
+<link rel="stylesheet" href="style.css">
+</head>
+<body data-theme="light">
+<header class="topbar">
+  <button id="btnBurger" class="btn icon" aria-label="menu">☰</button>
+  <div class="title">SGkasir</div>
+  <button id="btnTheme" class="btn icon" aria-label="theme">🌙</button>
+</header>
+
+<!-- drawer / sidebar -->
+<aside id="drawer" class="drawer">
+  <nav>
+    <button class="nav-item" onclick="show('transaksi')">Transaksi</button>
+    <button class="nav-item" onclick="show('history')">History</button>
+    <button class="nav-item" onclick="show('rekap')">Rekap</button>
+    <hr>
+    <div class="drawer-title">Keuangan</div>
+    <button class="nav-item" onclick="openForm('pemasukan')">Pemasukan</button>
+    <button class="nav-item" onclick="openForm('pengeluaran')">Pengeluaran</button>
+    <button class="nav-item" onclick="show('saldo')">Saldo Akun</button>
+    <hr>
+    <div class="drawer-title">Stok & Lainnya</div>
+    <button class="nav-item" onclick="show('stok')">Stok Barang</button>
+    <button class="nav-item" onclick="show('hutang')">Hutang / Piutang</button>
+    <button class="nav-item" onclick="show('audit')">Audit Stok</button>
+    <hr>
+    <button class="nav-item" onclick="show('pengaturan')">Pengaturan</button>
+  </nav>
+</aside>
+
+<main id="main">
+  <!-- Transaksi (default) -->
+  <section id="transaksi" class="page active">
+    <h2>Transaksi</h2>
+    <div class="card">
+      <label>Nama Produk</label>
+      <input id="tx_produk" placeholder="Contoh: Pulsa Telkomsel 20K">
+      <label>Harga (Rp)</label>
+      <input id="tx_harga" type="number" placeholder="0">
+      <label>Pilih Akun (saldo meningkat ke)</label>
+      <select id="tx_akun"></select>
+      <div class="row">
+        <button class="btn" onclick="simpanPenjualan()">Simpan Penjualan</button>
+        <button class="btn ghost" onclick="clearTransaksi()">Bersihkan</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- History -->
+  <section id="history" class="page">
+    <h2>History</h2>
+    <div class="controls">
+      <input type="date" id="filterFrom">
+      <input type="date" id="filterTo">
+      <select id="filterJenis"><option value="">Semua</option><option value="penjualan">Penjualan</option><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select>
+      <button class="btn" onclick="applyFilter()">Filter</button>
+    </div>
+
+    <table class="table">
+      <thead><tr><th><input id="chkAll" type="checkbox" onchange="toggleAll(this)"></th><th>Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Jumlah</th></tr></thead>
+      <tbody id="tblHistory"></tbody>
+    </table>
+
+    <div class="row">
+      <textarea id="exportNote" placeholder="Catatan untuk print/share (opsional)"></textarea>
+    </div>
+    <div class="row">
+      <button class="btn" onclick="exportSelected('print')">Print</button>
+      <button class="btn" onclick="exportSelected('txt')">Share TXT</button>
+      <button class="btn" onclick="exportSelected('png')">Share PNG</button>
+    </div>
+  </section>
+
+  <!-- Rekap -->
+  <section id="rekap" class="page">
+    <h2>Rekap</h2>
+    <div class="card small">
+      <div>Omzet: Rp <span id="rekapOmzet">0</span></div>
+      <div>Pemasukan: Rp <span id="rekapMasuk">0</span></div>
+      <div>Pengeluaran: Rp <span id="rekapKeluar">0</span></div>
+      <div>Saldo Akun (total): Rp <span id="rekapSaldo">0</span></div>
+    </div>
+    <div>
+      Pilih Bulan: <input type="month" id="rekapMonth"><button class="btn" onclick="generateRekap()">Tampilkan</button>
+    </div>
+  </section>
+
+  <!-- Saldo Akun -->
+  <section id="saldo" class="page">
+    <h2>Saldo Akun</h2>
+    <div class="card">
+      <label>Nama Akun</label><input id="acc_name" placeholder="Cash / BCA / OVO">
+      <label>Tipe</label><select id="acc_type"><option value="cash">Cash</option><option value="bank">Bank</option><option value="emoney">E-Money</option></select>
+      <label>Saldo Awal</label><input id="acc_balance" type="number" value="0">
+      <button class="btn" onclick="tambahAkun()">Tambah Akun</button>
+    </div>
+    <table class="table"><thead><tr><th>Akun</th><th>Tipe</th><th>Saldo</th></tr></thead><tbody id="tblAkun"></tbody></table>
+  </section>
+
+  <!-- Stok, Hutang, Audit, Pengaturan minimal placeholders -->
+  <section id="stok" class="page"><h2>Stok Barang</h2><div class="card small">(Fitur stok lengkap menyusul)</div></section>
+  <section id="hutang" class="page"><h2>Hutang / Piutang</h2><div class="card small">(Fitur hutang/piutang menyusul)</div></section>
+  <section id="audit" class="page"><h2>Audit Stok</h2><div class="card small">(Audit stok)</div></section>
+  <section id="pengaturan" class="page">
+    <h2>Pengaturan Toko</h2>
+    <label>Nama Toko</label><input id="store_name" placeholder="Nama Toko">
+    <label>Alamat</label><input id="store_address" placeholder="Alamat">
+    <label>Telepon</label><input id="store_phone" placeholder="0812xxx">
+    <label>Logo URL (logo.png kalau di repo)</label><input id="store_logo" placeholder="logo.png">
+    <button class="btn" onclick="saveStore()">Simpan</button>
+  </section>
+</main>
+
+<!-- hidden area for print/png generation -->
+<div id="printArea" style="display:none;"></div>
+
+<nav class="bottomnav">
+  <button class="bn" onclick="show('transaksi')">Transaksi</button>
+  <button class="bn" onclick="show('history')">History</button>
+  <button class="bn" onclick="show('rekap')">Rekap</button>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="app.js"></script>
+<script>
+  // register sw
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
+  }
+</script>
+</body>
+</html>
