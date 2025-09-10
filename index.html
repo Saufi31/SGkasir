@@ -1,168 +1,132 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>SGkasir</title>
-<link rel="icon" href="logo.png" />
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#007bff">
-<link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SGkasir</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+  <!-- Custom Style -->
+  <link rel="stylesheet" href="style.css">
 </head>
-<body data-theme="light">
-<header class="topbar">
-  <button id="btnBurger" class="btn icon" aria-label="menu">☰</button>
-  <div class="title">SGkasir</div>
-  <button id="btnTheme" class="btn icon" aria-label="theme">🌙</button>
-</header>
+<body>
 
-<!-- drawer / sidebar -->
-<aside id="drawer" class="drawer">
-  <nav>
-    <button class="nav-item" onclick="show('transaksi')">Transaksi</button>
-    <button class="nav-item" onclick="show('history')">History</button>
-    <button class="nav-item" onclick="show('rekap')">Rekap</button>
-    <hr>
-    <div class="drawer-title">Keuangan</div>
-    <button class="nav-item" onclick="openForm('pemasukan')">Pemasukan</button>
-    <button class="nav-item" onclick="openForm('pengeluaran')">Pengeluaran</button>
-    <button class="nav-item" onclick="show('saldo')">Saldo Akun</button>
-    <hr>
-    <div class="drawer-title">Stok & Lainnya</div>
-    <button class="nav-item" onclick="show('stok')">Stok Barang</button>
-    <button class="nav-item" onclick="show('hutang')">Hutang / Piutang</button>
-    <button class="nav-item" onclick="show('audit')">Audit Stok</button>
-    <hr>
-    <button class="nav-item" onclick="show('pengaturan')">Pengaturan</button>
+  <!-- Navbar atas -->
+  <nav class="navbar bg-light border-bottom">
+    <div class="container-fluid">
+      <button class="btn btn-outline-dark" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="navbar-brand ms-2">SGkasir</span>
+      <button id="darkModeToggle" class="btn btn-outline-dark"><i class="bi bi-moon"></i></button>
+    </div>
   </nav>
-</aside>
 
-<main id="main">
-  <!-- Transaksi (default) -->
-  <section id="transaksi" class="page active">
-    <h2>Transaksi</h2>
-    <div class="card">
-      <label>Nama Produk</label>
-      <input id="tx_produk" placeholder="Contoh: Pulsa Telkomsel 20K">
-      <label>Harga (Rp)</label>
-      <input id="tx_harga" type="number" placeholder="0">
-      <label>Pilih Akun (saldo meningkat ke)</label>
-      <select id="tx_akun"></select>
-      <div class="row">
-        <button class="btn" onclick="simpanPenjualan()">Simpan Penjualan</button>
-        <button class="btn ghost" onclick="clearTransaksi()">Bersihkan</button>
+  <!-- Sidebar Burger Menu -->
+  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title">Menu Lainnya</h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    </div>
+    <div class="offcanvas-body">
+      <a class="btn btn-outline-primary w-100 mb-2" href="#pemasukan">Pemasukan</a>
+      <a class="btn btn-outline-primary w-100 mb-2" href="#pengeluaran">Pengeluaran</a>
+      <a class="btn btn-outline-primary w-100 mb-2" href="#saldo">Saldo Akun</a>
+      <a class="btn btn-outline-primary w-100 mb-2" href="#stok">Stok Barang</a>
+      <a class="btn btn-outline-primary w-100 mb-2" href="#hutang">Hutang / Piutang</a>
+      <a class="btn btn-outline-primary w-100 mb-2" href="#audit">Audit Stok</a>
+      <a class="btn btn-outline-secondary w-100" href="#pengaturan">Pengaturan</a>
+    </div>
+  </div>
+
+  <!-- Section Transaksi -->
+  <section id="transaksi" class="container my-4">
+    <h3><i class="bi bi-cash"></i> Transaksi</h3>
+    <div class="card p-3 shadow-sm">
+      <div class="mb-3">
+        <label class="form-label">Nama Produk</label>
+        <input type="text" class="form-control" placeholder="Contoh: Pulsa Telkomsel 20K">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Harga (Rp)</label>
+        <input type="number" class="form-control" placeholder="0">
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Pilih Akun</label>
+        <select class="form-select">
+          <option>Kas (Cash)</option>
+          <option>Bank BCA</option>
+          <option>Bank BRI</option>
+        </select>
+      </div>
+      <button class="btn btn-success"><i class="bi bi-save"></i> Simpan Penjualan</button>
+      <button class="btn btn-danger"><i class="bi bi-trash"></i> Bersihkan</button>
+    </div>
+  </section>
+
+  <!-- Section History -->
+  <section id="history" class="container my-4">
+    <h3><i class="bi bi-clock-history"></i> History</h3>
+    <div class="card p-3 shadow-sm">
+      <div class="d-flex gap-2 mb-2">
+        <button class="btn btn-outline-primary btn-sm">Filter</button>
+        <button class="btn btn-outline-success btn-sm">Export CSV</button>
+      </div>
+      <textarea class="form-control mb-2" placeholder="Catatan untuk print/share"></textarea>
+      <div class="d-flex gap-2">
+        <button class="btn btn-secondary btn-sm">Print</button>
+        <button class="btn btn-info btn-sm">Share TXT</button>
+        <button class="btn btn-warning btn-sm">Share PNG</button>
       </div>
     </div>
   </section>
 
-  <!-- History -->
-  <section id="history" class="page">
-    <h2>History</h2>
-    <div class="controls">
-      <input type="date" id="filterFrom">
-      <input type="date" id="filterTo">
-      <select id="filterJenis"><option value="">Semua</option><option value="penjualan">Penjualan</option><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select>
-      <button class="btn" onclick="applyFilter()">Filter</button>
-      <button class="btn" onclick="exportSelected('csv')">Export CSV</button>
-    </div>
-
-    <table class="table">
-      <thead><tr><th><input id="chkAll" type="checkbox" onchange="toggleAll(this)"></th><th>Tanggal</th><th>Jenis</th><th>Keterangan</th><th>Jumlah</th></tr></thead>
-      <tbody id="tblHistory"></tbody>
-    </table>
-
-    <div class="row">
-      <textarea id="exportNote" placeholder="Catatan untuk print/share (opsional)"></textarea>
-    </div>
-    <div class="row">
-      <button class="btn" onclick="exportSelected('print')">Print</button>
-      <button class="btn" onclick="exportSelected('txt')">Share TXT</button>
-      <button class="btn" onclick="exportSelected('png')">Share PNG</button>
+  <!-- Section Rekap -->
+  <section id="rekap" class="container my-4">
+    <h3><i class="bi bi-graph-up"></i> Rekap</h3>
+    <div class="card p-3 shadow-sm">
+      <p>Omzet: Rp 0</p>
+      <p>Pemasukan: Rp 0</p>
+      <p>Pengeluaran: Rp 0</p>
+      <p>Saldo Akun (total): Rp 0</p>
+      <div class="mb-3">
+        <label class="form-label">Pilih Bulan:</label>
+        <select class="form-select">
+          <option>Januari</option>
+          <option>Februari</option>
+          <option>Maret</option>
+        </select>
+      </div>
+      <button class="btn btn-primary">Tampilkan</button>
     </div>
   </section>
 
-  <!-- Rekap -->
-  <section id="rekap" class="page">
-    <h2>Rekap</h2>
-    <div class="card small">
-      <div>Omzet: Rp <span id="rekapOmzet">0</span></div>
-      <div>Pemasukan: Rp <span id="rekapMasuk">0</span></div>
-      <div>Pengeluaran: Rp <span id="rekapKeluar">0</span></div>
-      <div>Saldo Akun (total): Rp <span id="rekapSaldo">0</span></div>
+  <!-- Navbar bawah -->
+  <nav class="navbar fixed-bottom bg-light border-top">
+    <div class="container d-flex justify-content-around">
+      <a href="#transaksi" class="btn btn-light text-center"><i class="bi bi-cash"></i><br>Transaksi</a>
+      <a href="#history" class="btn btn-light text-center"><i class="bi bi-clock-history"></i><br>History</a>
+      <a href="#rekap" class="btn btn-light text-center"><i class="bi bi-graph-up"></i><br>Rekap</a>
     </div>
-    <div>
-      Pilih Bulan: <input type="month" id="rekapMonth"><button class="btn" onclick="generateRekap()">Tampilkan</button>
-    </div>
-  </section>
+  </nav>
 
-  <!-- Saldo Akun -->
-  <section id="saldo" class="page">
-    <h2>Saldo Akun</h2>
-    <div class="card">
-      <label>Nama Akun</label><input id="acc_name" placeholder="Cash / BCA / OVO">
-      <label>Tipe</label><select id="acc_type"><option value="cash">Cash</option><option value="bank">Bank</option><option value="emoney">E-Money</option></select>
-      <label>Saldo Awal</label><input id="acc_balance" type="number" value="0">
-      <button class="btn" onclick="tambahAkun()">Tambah Akun</button>
-    </div>
-    <table class="table"><thead><tr><th>Akun</th><th>Tipe</th><th>Saldo</th></tr></thead><tbody id="tblAkun"></tbody></table>
-  </section>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Stok, Hutang, Audit, Pengaturan minimal placeholders -->
-<section id="stok" class="page">
-  <h2>Stok Barang</h2>
-  <div class="card">
-    <label>Nama Barang</label><input id="st_nama">
-    <label>Harga Modal</label><input id="st_modal" type="number">
-    <label>Harga Jual</label><input id="st_jual" type="number">
-    <label>Jumlah Stok</label><input id="st_jumlah" type="number">
-    <button class="btn" onclick="tambahBarang()">Tambah Barang</button>
-  </div>
-  <table class="table">
-    <thead><tr><th>Barang</th><th>Modal</th><th>Jual</th><th>Stok</th><th></th></tr></thead>
-    <tbody id="tblStok"></tbody>
-  </table>
-</section>
- <section id="hutang" class="page">
-  <h2>Hutang / Piutang</h2>
-  <div class="card">
-    <label>Nama</label><input id="hp_nama">
-    <label>Jumlah</label><input id="hp_jumlah" type="number">
-    <label>Keterangan</label><input id="hp_ket">
-    <select id="hp_jenis"><option value="piutang">Piutang (pelanggan hutang)</option><option value="hutang">Hutang (ke supplier)</option></select>
-    <button class="btn" onclick="tambahHP()">Tambah</button>
-  </div>
-  <table class="table">
-    <thead><tr><th>Nama</th><th>Jenis</th><th>Jumlah</th><th>Ket</th><th>Status</th><th></th></tr></thead>
-    <tbody id="tblHP"></tbody>
-  </table>
-</section>
-  <section id="audit" class="page"><h2>Audit Stok</h2><div class="card small">(Audit stok)</div></section>
-  <section id="pengaturan" class="page">
-    <h2>Pengaturan Toko</h2>
-    <label>Nama Toko</label><input id="store_name" placeholder="Nama Toko">
-    <label>Alamat</label><input id="store_address" placeholder="Alamat">
-    <label>Telepon</label><input id="store_phone" placeholder="0812xxx">
-    <label>Logo URL (logo.png kalau di repo)</label><input id="store_logo" placeholder="logo.png">
-    <button class="btn" onclick="saveStore()">Simpan</button>
-  </section>
-</main>
-
-<!-- hidden area for print/png generation -->
-<div id="printArea" style="display:none;"></div>
-
-<nav class="bottomnav">
-  <button class="bn" onclick="show('transaksi')">Transaksi</button>
-  <button class="bn" onclick="show('history')">History</button>
-  <button class="bn" onclick="show('rekap')">Rekap</button>
-</nav>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="app.js"></script>
-<script>
-  // register sw
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js').catch(()=>{});
-  }
-</script>
+  <!-- Dark mode script -->
+  <script>
+    const toggleBtn = document.getElementById('darkModeToggle');
+    toggleBtn.addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      toggleBtn.innerHTML = document.body.classList.contains('dark-mode') 
+        ? '<i class="bi bi-sun"></i>' 
+        : '<i class="bi bi-moon"></i>';
+    });
+  </script>
 </body>
 </html>

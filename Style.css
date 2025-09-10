@@ -1,31 +1,126 @@
-:root{
-  --bg:#ffffff; --text:#111; --card:#f7f9fc; --primary:#007bff;
+/* ====== GLOBAL ====== */
+body {
+  font-family: "Poppins", sans-serif;
+  background-color: #f8f9fa;
+  color: #212529;
+  transition: all 0.3s ease;
 }
-[data-theme="dark"], body[data-theme="dark"]{
-  --bg:#121212; --text:#e6eef9; --card:#1b1b1b; --primary:#4dabf7;
+
+body.dark-mode {
+  background-color: #121212;
+  color: #eaeaea;
 }
-*{box-sizing:border-box}
-body{margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
-.topbar{height:52px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 10px;position:sticky;top:0}
-.title{font-weight:600}
-.btn{background:var(--primary);color:#fff;border:none;padding:8px 10px;border-radius:6px;cursor:pointer}
-.btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.08);color:var(--text)}
-.icon{background:none;padding:6px;font-size:18px;color:#fff}
-.drawer{position:fixed;left:-260px;top:0;width:240px;height:100%;background:var(--card);padding:12px;box-shadow:2px 0 6px rgba(0,0,0,0.15);transition:left .22s;z-index:30}
-.drawer.open{left:0}
-.drawer .nav-item{display:block;width:100%;padding:8px;border:none;background:none;text-align:left;margin-bottom:6px;cursor:pointer}
-.main{padding:12px}
-main{padding:12px;padding-bottom:80px}
-.page{display:none}
-.page.active{display:block}
-.card{background:var(--card);padding:10px;border-radius:8px;margin-bottom:12px}
-.small{font-size:13px}
-.row{display:flex;gap:8px;align-items:center}
-.table{width:100%;border-collapse:collapse;margin-top:8px}
-.table th,.table td{border:1px solid rgba(0,0,0,0.08);padding:6px;text-align:left;font-size:13px}
-.bottomnav{position:fixed;left:0;right:0;bottom:0;display:flex;border-top:1px solid rgba(0,0,0,0.06);background:var(--card)}
-.bottomnav .bn{flex:1;padding:10px;border:none;background:transparent;font-size:14px;cursor:pointer}
-.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
-textarea{min-height:64px;padding:8px;border-radius:6px;border:1px solid #ccc;background:transparent;color:var(--text)}
-input,select,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.08);background:transparent;color:var(--text);margin-top:6px}
-@media(min-width:700px){main{max-width:720px;margin:0 auto}}
+
+/* ====== CARD ====== */
+.card {
+  border-radius: 12px;
+  border: none;
+}
+
+.card.shadow-sm {
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+body.dark-mode .card {
+  background-color: #1e1e1e;
+  color: #eaeaea;
+}
+
+/* ====== NAVBAR ====== */
+.navbar {
+  padding: 0.5rem 1rem;
+}
+
+.navbar .btn {
+  border-radius: 8px;
+}
+
+/* ====== NAVBAR BOTTOM ====== */
+.navbar.fixed-bottom {
+  background: #ffffff;
+}
+
+.navbar.fixed-bottom .btn {
+  flex: 1;
+  border: none;
+  border-radius: 0;
+  font-size: 0.85rem;
+  padding: 8px 0;
+  color: #555;
+}
+
+.navbar.fixed-bottom .btn:hover {
+  background-color: #f1f1f1;
+}
+
+body.dark-mode .navbar.fixed-bottom {
+  background-color: #1e1e1e;
+}
+
+body.dark-mode .navbar.fixed-bottom .btn {
+  color: #eaeaea;
+}
+
+/* ====== OFFCANVAS MENU ====== */
+.offcanvas {
+  width: 250px;
+}
+
+.offcanvas-body .btn {
+  text-align: left;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+body.dark-mode .offcanvas {
+  background-color: #1e1e1e;
+  color: #eaeaea;
+}
+
+/* ====== TITLES ====== */
+h3 {
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+h3 i {
+  font-size: 1.3rem;
+  color: #0d6efd;
+}
+
+/* ====== BUTTONS ====== */
+.btn {
+  border-radius: 8px;
+}
+
+.btn-success, .btn-primary {
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+/* ====== FORM ====== */
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 0.6rem;
+}
+
+body.dark-mode .form-control,
+body.dark-mode .form-select {
+  background-color: #2a2a2a;
+  border: 1px solid #444;
+  color: #fff;
+}
+
+/* ====== TEXTAREA ====== */
+textarea {
+  min-height: 60px;
+}
+
+/* ====== DARK MODE SPECIAL ====== */
+body.dark-mode h3 i {
+  color: #ffc107;
+}
