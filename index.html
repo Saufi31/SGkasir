@@ -63,6 +63,7 @@
       <input type="date" id="filterTo">
       <select id="filterJenis"><option value="">Semua</option><option value="penjualan">Penjualan</option><option value="pemasukan">Pemasukan</option><option value="pengeluaran">Pengeluaran</option></select>
       <button class="btn" onclick="applyFilter()">Filter</button>
+      <button class="btn" onclick="exportSelected('csv')">Export CSV</button>
     </div>
 
     <table class="table">
@@ -107,8 +108,34 @@
   </section>
 
   <!-- Stok, Hutang, Audit, Pengaturan minimal placeholders -->
-  <section id="stok" class="page"><h2>Stok Barang</h2><div class="card small">(Fitur stok lengkap menyusul)</div></section>
-  <section id="hutang" class="page"><h2>Hutang / Piutang</h2><div class="card small">(Fitur hutang/piutang menyusul)</div></section>
+<section id="stok" class="page">
+  <h2>Stok Barang</h2>
+  <div class="card">
+    <label>Nama Barang</label><input id="st_nama">
+    <label>Harga Modal</label><input id="st_modal" type="number">
+    <label>Harga Jual</label><input id="st_jual" type="number">
+    <label>Jumlah Stok</label><input id="st_jumlah" type="number">
+    <button class="btn" onclick="tambahBarang()">Tambah Barang</button>
+  </div>
+  <table class="table">
+    <thead><tr><th>Barang</th><th>Modal</th><th>Jual</th><th>Stok</th><th></th></tr></thead>
+    <tbody id="tblStok"></tbody>
+  </table>
+</section>
+ <section id="hutang" class="page">
+  <h2>Hutang / Piutang</h2>
+  <div class="card">
+    <label>Nama</label><input id="hp_nama">
+    <label>Jumlah</label><input id="hp_jumlah" type="number">
+    <label>Keterangan</label><input id="hp_ket">
+    <select id="hp_jenis"><option value="piutang">Piutang (pelanggan hutang)</option><option value="hutang">Hutang (ke supplier)</option></select>
+    <button class="btn" onclick="tambahHP()">Tambah</button>
+  </div>
+  <table class="table">
+    <thead><tr><th>Nama</th><th>Jenis</th><th>Jumlah</th><th>Ket</th><th>Status</th><th></th></tr></thead>
+    <tbody id="tblHP"></tbody>
+  </table>
+</section>
   <section id="audit" class="page"><h2>Audit Stok</h2><div class="card small">(Audit stok)</div></section>
   <section id="pengaturan" class="page">
     <h2>Pengaturan Toko</h2>

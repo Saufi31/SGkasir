@@ -1,5 +1,61 @@
 // minimal full-core logic (Firestore not used). Data persisted to localStorage.
 // Later bisa ganti ke Firebase / IndexedDB.
+if(!state.stok) state.stok=[];
+if(!state.hp) state.hp=[];
+
+function tambahBarang(){
+  const nama = document.getElementById('st_nama').value.trim();
+  const modal = parseFloat(document.getElementById('st_modal').value)||0;
+  const jual = parseFloat(document.getElementById('st_jual').value)||0;
+  const jumlah = parseInt(document.getElementById('st_jumlah').value)||0;
+  if(!nama) return alert('Isi nama barang');
+  const id='brg_'+Date.now();
+  state.stok.push({id,nama,modal,jual,jumlah});
+  saveState(); renderStok();
+  document.getElementById('st_nama').value=''; document.getElementById('st_modal').value=''; document.getElementById('st_jual').value=''; document.getElementById('st_jumlah').value='';
+}
+function renderStok(){
+  const tbody=document.getElementById('tblStok'); tbody.innerHTML='';
+  state.stok.forEach(b=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${b.nama}</td><td>Rp ${format(b.modal)}</td><td>Rp ${format(b.jual)}</td><td>${b.jumlah}</td>
+    <td><button onclick="hapusBarang('${b.id}')">Hapus</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function hapusBarang(id){
+  state.stok=state.stok.filter(b=>b.id!==id);
+  saveState(); renderStok();
+}
+function tambahHP(){
+  const nama=document.getElementById('hp_nama').value.trim();
+  const jumlah=parseFloat(document.getElementById('hp_jumlah').value)||0;
+  const ket=document.getElementById('hp_ket').value.trim();
+  const jenis=document.getElementById('hp_jenis').value;
+  if(!nama||!jumlah) return alert('Lengkapi data');
+  const id='hp_'+Date.now();
+  state.hp.push({id,nama,jumlah,ket,jenis,status:'belum'});
+  saveState(); renderHP();
+  document.getElementById('hp_nama').value=''; document.getElementById('hp_jumlah').value=''; document.getElementById('hp_ket').value='';
+}
+function renderHP(){
+  const tbody=document.getElementById('tblHP'); tbody.innerHTML='';
+  state.hp.forEach(h=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${h.nama}</td><td>${h.jenis}</td><td>Rp ${format(h.jumlah)}</td><td>${h.ket}</td><td>${h.status}</td>
+    <td>${h.status==='belum'?`<button onclick="lunasHP('${h.id}')">Lunas</button>`:''}<button onclick="hapusHP('${h.id}')">Hapus</button></td>`;
+    tbody.appendChild(tr);
+  });
+}
+function lunasHP(id){
+  const h=state.hp.find(x=>x.id===id); if(h) h.status='lunas';
+  saveState(); renderHP();
+}
+function hapusHP(id){
+  state.hp=state.hp.filter(x=>x.id!==id);
+  saveState(); renderHP();
+}
+
 
 const STORE_KEY = 'sgkasir_v1';
 const STORE_META = 'sgkasir_meta';
@@ -7,6 +63,8 @@ let state = { accounts: [], transactions: [], store:{} };
 
 // init
 document.addEventListener('DOMContentLoaded', ()=>{
+  renderStok();
+  renderHP();
   loadState();
   bindUI();
   renderAccounts();
@@ -87,6 +145,17 @@ function simpanPenjualan(){
   const nama = document.getElementById('tx_produk').value.trim();
   const harga = parseFloat(document.getElementById('tx_harga').value)||0;
   const acc = document.getElementById('tx_akun').value;
+  if(!nama || !harga || !acc) return alert('Isi semua field');
+  const tx = { id:'tx_'+Date.now(), ts:new Date().toISOString(), jenis:'penjualan', desc:nama, amount:harga, account:acc };
+  state.transactions.unshift(tx);
+  const a=state.accounts.find(x=>x.id===acc); if(a) a.balance+=harga;
+  // kurangi stok jika ada barang dengan nama sama
+  const brg=state.stok.find(b=>b.nama.toLowerCase()===nama.toLowerCase()); if(brg){ brg.jumlah=Math.max(0,brg.jumlah-1); }
+  saveState(); clearTransaksi(); renderHistory(); renderAccounts(); renderStok(); alert('Penjualan tersimpan');
+}
+  const nama = document.getElementById('tx_produk').value.trim();
+  const harga = parseFloat(document.getElementById('tx_harga').value)||0;
+  const acc = document.getElementById('tx_akun').value;
   if(!nama || !harga || !acc) return alert('Isi semua field dan pilih akun');
   const tx = { id:'tx_'+Date.now(), ts: new Date().toISOString(), jenis:'penjualan', desc:nama, amount: harga, account: acc };
   state.transactions.unshift(tx);
@@ -139,6 +208,12 @@ function toggleAll(cb){
 
 /* -------------- EXPORT / PRINT / SHARE -------------- */
 async function exportSelected(mode){
+  else if(mode==='csv'){
+  const rows=[['Tanggal','Jenis','Keterangan','Jumlah']];
+  items.forEach(it=>rows.push([new Date(it.ts).toLocaleString(),it.jenis,it.desc,it.amount]));
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  downloadBlob(csv,'history.csv','text/csv');
+}
   // collect selected ids
   const ids = Array.from(document.querySelectorAll('.chkItem')).filter(c=>c.checked).map(c=>c.dataset.id);
   if(ids.length===0) return alert('Pilih minimal satu transaksi');
