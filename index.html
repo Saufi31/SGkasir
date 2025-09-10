@@ -52,7 +52,7 @@
     </div>
   </div>
 
-  <!-- Halaman: Transaksi -->
+  <!-- Transaksi -->
   <div id="transaksi" class="page-section active">
     <h5><i class="fas fa-cash-register"></i> Transaksi</h5>
     <div class="card p-3">
@@ -64,7 +64,7 @@
     </div>
   </div>
 
-  <!-- Halaman: History -->
+  <!-- History -->
   <div id="history" class="page-section">
     <h5><i class="fas fa-history"></i> History</h5>
     <div class="card p-3">
@@ -79,7 +79,7 @@
     </div>
   </div>
 
-  <!-- Halaman: Rekap -->
+  <!-- Rekap -->
   <div id="rekap" class="page-section">
     <h5><i class="fas fa-chart-line"></i> Rekap</h5>
     <div class="card p-3">
@@ -119,16 +119,46 @@
   </div>
 
   <!-- Stok Barang -->
-  <div id="stok" class="page-section"><h5>Stok Barang</h5></div>
+  <div id="stok" class="page-section">
+    <h5>Stok Barang</h5>
+    <table class="table table-striped">
+      <thead><tr><th>Nama Barang</th><th>Stok</th><th>Harga</th></tr></thead>
+      <tbody id="stokList"></tbody>
+    </table>
+    <input type="text" id="namaBarang" class="form-control mb-2" placeholder="Nama Barang">
+    <input type="number" id="stokJumlah" class="form-control mb-2" placeholder="Jumlah">
+    <input type="number" id="stokHarga" class="form-control mb-2" placeholder="Harga">
+    <button class="btn btn-primary w-100" onclick="tambahStok()">+ Tambah Barang</button>
+  </div>
 
   <!-- Hutang Piutang -->
-  <div id="hutang" class="page-section"><h5>Hutang / Piutang</h5></div>
+  <div id="hutang" class="page-section">
+    <h5>Hutang / Piutang</h5>
+    <table class="table table-striped">
+      <thead><tr><th>Nama</th><th>Jumlah</th><th>Tipe</th></tr></thead>
+      <tbody id="hutangList"></tbody>
+    </table>
+    <input type="text" id="namaHutang" class="form-control mb-2" placeholder="Nama">
+    <input type="number" id="jumlahHutang" class="form-control mb-2" placeholder="Jumlah">
+    <select id="tipeHutang" class="form-select mb-2">
+      <option value="Hutang">Hutang</option>
+      <option value="Piutang">Piutang</option>
+    </select>
+    <button class="btn btn-primary w-100" onclick="tambahHutang()">+ Simpan</button>
+  </div>
 
   <!-- Audit Stok -->
-  <div id="audit" class="page-section"><h5>Audit Stok</h5></div>
+  <div id="audit" class="page-section">
+    <h5>Audit Stok</h5>
+    <div id="auditList"></div>
+    <button class="btn btn-warning w-100" onclick="auditStok()">🔎 Audit</button>
+  </div>
 
   <!-- Pengaturan -->
-  <div id="pengaturan" class="page-section"><h5>Pengaturan</h5></div>
+  <div id="pengaturan" class="page-section">
+    <h5>Pengaturan</h5>
+    <button class="btn btn-secondary w-100" onclick="resetData()">Reset Semua Data</button>
+  </div>
 
   <!-- Bottom Nav -->
   <div class="bottom-nav">
@@ -140,11 +170,10 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
   <script src="app.js"></script>
   <script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("Service Worker terdaftar"))
-      .catch(err => console.log("SW gagal:", err));
-  }
-</script>
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("service-worker.js");
+    }
+  </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </body>
 </html>

@@ -1,168 +1,262 @@
-// =================== Data Storage ===================
+// ========================== DATA ==========================
 let data = {
-  akun: [
-    { nama: "Kas (Cash)", saldo: 0 },
-    { nama: "Bank", saldo: 0 }
-  ],
   transaksi: [],
   pemasukan: [],
-  pengeluaran: []
+  pengeluaran: [],
+  akun: [{ nama: "Cash", saldo: 0 }],
+  stok: [],
+  hutang: []
 };
 
-// Load dari localStorage
-if (localStorage.getItem("sgkasir")) {
-  data = JSON.parse(localStorage.getItem("sgkasir"));
-}
-function saveData() {
-  localStorage.setItem("sgkasir", JSON.stringify(data));
+// ========================== UTIL ==========================
+function simpanData() {
+  localStorage.setItem("kasirData", JSON.stringify(data));
 }
 
-// =================== Utility ===================
-function formatRp(n) {
-  return new Intl.NumberFormat("id-ID").format(n);
-}
-function updateUI() {
-  // Rekap
-  let omzet = 0, pemasukan = 0, pengeluaran = 0, saldo = 0;
-
-  data.transaksi.forEach(t => omzet += t.harga);
-  data.pemasukan.forEach(p => pemasukan += p.jumlah);
-  data.pengeluaran.forEach(p => pengeluaran += p.jumlah);
-  data.akun.forEach(a => saldo += a.saldo);
-
-  document.getElementById("rekapOmzet").innerText = formatRp(omzet);
-  document.getElementById("rekapPemasukan").innerText = formatRp(pemasukan);
-  document.getElementById("rekapPengeluaran").innerText = formatRp(pengeluaran);
-  document.getElementById("rekapSaldo").innerText = formatRp(saldo);
-
-  // History
-  let list = document.getElementById("historyList");
-  if (list) {
-    list.innerHTML = "";
-    [...data.transaksi, ...data.pemasukan, ...data.pengeluaran].forEach(item => {
-      let li = document.createElement("li");
-      li.className = "list-group-item";
-      li.textContent = `${item.tanggal} - ${item.ket} - Rp ${formatRp(item.jumlah || item.harga)}`;
-      list.appendChild(li);
-    });
+function loadData() {
+  let saved = localStorage.getItem("kasirData");
+  if (saved) {
+    data = JSON.parse(saved);
   }
-
-  // Akun Dropdown
-  let akunSelect = document.getElementById("akunTransaksi");
-  if (akunSelect) {
-    akunSelect.innerHTML = "";
-    data.akun.forEach(a => {
-      let opt = document.createElement("option");
-      opt.value = a.nama;
-      opt.textContent = `${a.nama} (Rp ${formatRp(a.saldo)})`;
-      akunSelect.appendChild(opt);
-    });
-  }
-
-  saveData();
+  renderHistory();
+  renderRekap();
+  renderAkun();
+  renderStok();
+  renderHutang();
 }
-updateUI();
 
-// =================== Transaksi ===================
+// ========================== NAVIGASI ==========================
+function showSection(id) {
+  document.querySelectorAll(".page-section").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  // tutup sidebar
+  let offcanvas = document.querySelector(".offcanvas.show");
+  if (offcanvas) {
+    bootstrap.Offcanvas.getInstance(offcanvas).hide();
+  }
+}
+
+// ========================== TRANSAKSI ==========================
 function simpanTransaksi() {
   let nama = document.getElementById("namaProduk").value;
   let harga = parseInt(document.getElementById("hargaProduk").value) || 0;
-  let akun = document.getElementById("akunTransaksi").value;
-  if (!nama || harga <= 0) return alert("Lengkapi data transaksi");
+  let akunIndex = document.getElementById("akunTransaksi").selectedIndex;
 
-  let trx = { tanggal: new Date().toLocaleString(), ket: nama, harga, akun };
+  if (!nama || harga <= 0) {
+    alert("Lengkapi data transaksi");
+    return;
+  }
+
+  let trx = {
+    nama,
+    harga,
+    akun: data.akun[akunIndex].nama,
+    tanggal: new Date().toLocaleString()
+  };
+
   data.transaksi.push(trx);
-
-  // Update saldo akun
-  let akunObj = data.akun.find(a => a.nama === akun);
-  if (akunObj) akunObj.saldo += harga;
-
-  saveData();
-  updateUI();
+  data.akun[akunIndex].saldo += harga;
+  simpanData();
+  renderHistory();
+  renderRekap();
+  renderAkun();
   bersihkanForm();
 }
+
 function bersihkanForm() {
   document.getElementById("namaProduk").value = "";
   document.getElementById("hargaProduk").value = "";
 }
 
-// =================== Pemasukan & Pengeluaran ===================
-function tambahPemasukan(jumlah, ket = "Pemasukan") {
-  let item = { tanggal: new Date().toLocaleString(), jumlah, ket };
-  data.pemasukan.push(item);
-  data.akun[0].saldo += jumlah; // default ke Kas
-  saveData(); updateUI();
-}
-function tambahPengeluaran(jumlah, ket = "Pengeluaran") {
-  let item = { tanggal: new Date().toLocaleString(), jumlah, ket };
-  data.pengeluaran.push(item);
-  data.akun[0].saldo -= jumlah; // default ke Kas
-  saveData(); updateUI();
+// ========================== PEMASUKAN / PENGELUARAN ==========================
+function tambahPemasukan(jumlah, ket) {
+  if (jumlah <= 0) return;
+  let obj = { jumlah, ket, tanggal: new Date().toLocaleString() };
+  data.pemasukan.push(obj);
+  data.akun[0].saldo += jumlah; // default ke Cash
+  simpanData();
+  renderHistory();
+  renderRekap();
+  renderAkun();
 }
 
-// =================== Export & Share ===================
-function exportCSV() {
-  let rows = [["Tanggal", "Keterangan", "Jumlah"]];
-  [...data.transaksi, ...data.pemasukan, ...data.pengeluaran].forEach(i => {
-    rows.push([i.tanggal, i.ket, i.jumlah || i.harga]);
+function tambahPengeluaran(jumlah, ket) {
+  if (jumlah <= 0) return;
+  let obj = { jumlah, ket, tanggal: new Date().toLocaleString() };
+  data.pengeluaran.push(obj);
+  data.akun[0].saldo -= jumlah; // default ke Cash
+  simpanData();
+  renderHistory();
+  renderRekap();
+  renderAkun();
+}
+
+// ========================== SALDO AKUN ==========================
+function renderAkun() {
+  let akunList = document.getElementById("akunList");
+  let akunTransaksi = document.getElementById("akunTransaksi");
+  if (!akunList || !akunTransaksi) return;
+
+  akunList.innerHTML = "";
+  akunTransaksi.innerHTML = "";
+
+  data.akun.forEach((a, i) => {
+    akunList.innerHTML += `<tr><td>${a.nama}</td><td>Rp ${a.saldo.toLocaleString()}</td></tr>`;
+    akunTransaksi.innerHTML += `<option>${a.nama}</option>`;
   });
+}
+
+function tambahAkun(nama, saldo) {
+  if (!nama) return;
+  data.akun.push({ nama, saldo });
+  simpanData();
+  renderAkun();
+  renderRekap();
+}
+
+// ========================== STOK BARANG ==========================
+function renderStok() {
+  let stokList = document.getElementById("stokList");
+  if (!stokList) return;
+  stokList.innerHTML = "";
+  data.stok.forEach(b => {
+    stokList.innerHTML += `<tr><td>${b.nama}</td><td>${b.jumlah}</td><td>Rp ${b.harga.toLocaleString()}</td></tr>`;
+  });
+}
+
+function tambahStok() {
+  let nama = document.getElementById("namaBarang").value;
+  let jumlah = parseInt(document.getElementById("stokJumlah").value) || 0;
+  let harga = parseInt(document.getElementById("stokHarga").value) || 0;
+  if (!nama || jumlah <= 0 || harga <= 0) return;
+  data.stok.push({ nama, jumlah, harga });
+  simpanData();
+  renderStok();
+}
+
+// ========================== HUTANG / PIUTANG ==========================
+function renderHutang() {
+  let hutangList = document.getElementById("hutangList");
+  if (!hutangList) return;
+  hutangList.innerHTML = "";
+  data.hutang.forEach(h => {
+    hutangList.innerHTML += `<tr><td>${h.nama}</td><td>Rp ${h.jumlah.toLocaleString()}</td><td>${h.tipe}</td></tr>`;
+  });
+}
+
+function tambahHutang() {
+  let nama = document.getElementById("namaHutang").value;
+  let jumlah = parseInt(document.getElementById("jumlahHutang").value) || 0;
+  let tipe = document.getElementById("tipeHutang").value;
+  if (!nama || jumlah <= 0) return;
+  data.hutang.push({ nama, jumlah, tipe });
+  simpanData();
+  renderHutang();
+}
+
+// ========================== AUDIT STOK ==========================
+function auditStok() {
+  let out = "<ul>";
+  data.stok.forEach(b => {
+    out += `<li>${b.nama}: stok ${b.jumlah}</li>`;
+  });
+  out += "</ul>";
+  document.getElementById("auditList").innerHTML = out;
+}
+
+// ========================== HISTORY ==========================
+function renderHistory() {
+  let historyList = document.getElementById("historyList");
+  if (!historyList) return;
+  historyList.innerHTML = "";
+
+  data.transaksi.forEach(t => {
+    historyList.innerHTML += `<li class="list-group-item">[Penjualan] ${t.tanggal} - ${t.nama} Rp ${t.harga.toLocaleString()} (${t.akun})</li>`;
+  });
+  data.pemasukan.forEach(p => {
+    historyList.innerHTML += `<li class="list-group-item text-success">[Pemasukan] ${p.tanggal} - Rp ${p.jumlah.toLocaleString()} (${p.ket})</li>`;
+  });
+  data.pengeluaran.forEach(p => {
+    historyList.innerHTML += `<li class="list-group-item text-danger">[Pengeluaran] ${p.tanggal} - Rp ${p.jumlah.toLocaleString()} (${p.ket})</li>`;
+  });
+}
+
+// ========================== REKAP ==========================
+function renderRekap() {
+  let omzet = data.transaksi.reduce((a, b) => a + b.harga, 0);
+  let pemasukan = data.pemasukan.reduce((a, b) => a + b.jumlah, 0);
+  let pengeluaran = data.pengeluaran.reduce((a, b) => a + b.jumlah, 0);
+  let saldo = data.akun.reduce((a, b) => a + b.saldo, 0);
+
+  document.getElementById("rekapOmzet").innerText = omzet.toLocaleString();
+  document.getElementById("rekapPemasukan").innerText = pemasukan.toLocaleString();
+  document.getElementById("rekapPengeluaran").innerText = pengeluaran.toLocaleString();
+  document.getElementById("rekapSaldo").innerText = saldo.toLocaleString();
+}
+
+// ========================== EXPORT / SHARE ==========================
+function exportCSV() {
+  let rows = [["Tanggal", "Tipe", "Nama", "Jumlah", "Akun/Ket"]];
+  data.transaksi.forEach(t => rows.push([t.tanggal, "Transaksi", t.nama, t.harga, t.akun]));
+  data.pemasukan.forEach(p => rows.push([p.tanggal, "Pemasukan", p.ket, p.jumlah, "Cash"]));
+  data.pengeluaran.forEach(p => rows.push([p.tanggal, "Pengeluaran", p.ket, p.jumlah, "Cash"]));
+
   let csv = rows.map(r => r.join(",")).join("\n");
   let blob = new Blob([csv], { type: "text/csv" });
   let url = URL.createObjectURL(blob);
   let a = document.createElement("a");
-  a.href = url; a.download = "history.csv"; a.click();
+  a.href = url;
+  a.download = "rekap.csv";
+  a.click();
 }
 
 function printData() {
   let catatan = document.getElementById("catatanShare").value;
-  let win = window.open("", "", "width=600,height=400");
-  win.document.write("<pre>" + catatan + "\n\n");
-  data.transaksi.forEach(t => {
-    win.document.write(`${t.tanggal} - ${t.ket} - Rp ${formatRp(t.harga)}\n`);
-  });
-  win.document.write("</pre>");
-  win.print();
+  let w = window.open();
+  w.document.write("<h3>SGkasir</h3><p>" + catatan + "</p><pre>" + JSON.stringify(data, null, 2) + "</pre>");
+  w.print();
 }
 
 function shareTXT() {
-  let txt = document.getElementById("catatanShare").value + "\n\n";
-  data.transaksi.forEach(t => txt += `${t.tanggal} - ${t.ket} - Rp ${formatRp(t.harga)}\n`);
-  let blob = new Blob([txt], { type: "text/plain" });
-  let url = URL.createObjectURL(blob);
-  let a = document.createElement("a");
-  a.href = url; a.download = "history.txt"; a.click();
+  let catatan = document.getElementById("catatanShare").value;
+  let text = "SGkasir\n" + catatan + "\n\n" + JSON.stringify(data, null, 2);
+  if (navigator.share) {
+    navigator.share({ text });
+  } else {
+    alert(text);
+  }
 }
 
 function sharePNG() {
-  let area = document.getElementById("historyList");
-  html2canvas(area).then(canvas => {
-    let a = document.createElement("a");
-    a.href = canvas.toDataURL("image/png");
-    a.download = "history.png"; a.click();
+  html2canvas(document.body).then(canvas => {
+    canvas.toBlob(blob => {
+      let file = new File([blob], "kasir.png", { type: "image/png" });
+      if (navigator.share) {
+        navigator.share({ files: [file] });
+      } else {
+        let url = URL.createObjectURL(blob);
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = "kasir.png";
+        a.click();
+      }
+    });
   });
 }
 
-// =================== UI Control ===================
-function showSection(id) {
-  document.querySelectorAll(".page-section").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
-  document.querySelector(".offcanvas.show")?.classList.remove("show");
-}
-
-document.getElementById("toggleTheme").addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-  localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
-});
-if (localStorage.getItem("theme") === "dark") {
-  document.body.classList.add("dark-mode");
-}
-
-// =================== Library untuk PNG ===================
-function loadHtml2Canvas() {
-  if (typeof html2canvas === "undefined") {
-    let s = document.createElement("script");
-    s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
-    document.body.appendChild(s);
+// ========================== RESET ==========================
+function resetData() {
+  if (confirm("Yakin reset semua data?")) {
+    localStorage.removeItem("kasirData");
+    location.reload();
   }
 }
-loadHtml2Canvas();
+
+// ========================== THEME ==========================
+document.getElementById("toggleTheme").addEventListener("click", () => {
+  document.body.classList.toggle("dark-mode");
+});
+
+// ========================== START ==========================
+window.onload = loadData;
