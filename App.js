@@ -307,6 +307,22 @@ function resetData(){
 }
 document.getElementById('catatanPengaturan')?.addEventListener('change', (e)=>{ data.note = e.target.value; save(); });
 
+// expose handlers used by HTML onclick attributes
+window.showSection = showSection;
+window.simpanTransaksi = simpanTransaksi;
+window.tambahPemasukan = tambahPemasukan;
+window.tambahPengeluaran = tambahPengeluaran;
+window.tambahAkun = tambahAkun;
+window.tambahStok = tambahStok;
+window.tambahHutang = tambahHutang;
+window.auditStok = auditStok;
+window.exportCSV = exportCSV;
+window.downloadJSON = downloadJSON;
+window.printHistory = printHistory;
+window.shareTXT = shareTXT;
+window.sharePNG = sharePNG;
+window.resetData = resetData;
+
 /* init */
 window.addEventListener('load', ()=>{
   load();
