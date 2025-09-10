@@ -1,38 +1,5 @@
-const CACHE_NAME = "sgkasir-cache-v1";
-const urlsToCache = [
-  "/",
-  "/index.html",
-  "/app.js",
-  "/manifest.json",
-  "/icon-192.png",
-  "/icon-512.png"
-];
-
-// Install Service Worker
-self.addEventListener("install", event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(urlsToCache);
-    })
-  );
-});
-
-// Fetch dari cache kalau offline
-self.addEventListener("fetch", event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request);
-    })
-  );
-});
-
-// Update cache
-self.addEventListener("activate", event => {
-  event.waitUntil(
-    caches.keys().then(keys => {
-      return Promise.all(
-        keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      );
-    })
-  );
-});
+const CACHE='sgkasir-cache-v1';
+const FILES=['/','/index.html','/style.css','/app.js','/manifest.json','/icon-192.png'];
+self.addEventListener('install', e=> e.waitUntil(caches.open(CACHE).then(c=> c.addAll(FILES))));
+self.addEventListener('fetch', e=> e.respondWith(caches.match(e.request).then(r=> r || fetch(e.request))));
+self.addEventListener('activate', e=> e.waitUntil(caches.keys().then(keys=> Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));

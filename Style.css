@@ -1,126 +1,31 @@
-/* ====== GLOBAL ====== */
-body {
-  font-family: "Poppins", sans-serif;
-  background-color: #f8f9fa;
-  color: #212529;
-  transition: all 0.3s ease;
+:root{
+  --bg:#ffffff;
+  --text:#111;
+  --accent:#ff7a00; /* orange */
+  --muted:#f4f4f4;
 }
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,Arial;padding-top:56px}
+.header{position:fixed;top:0;left:0;right:0;z-index:1030}
+.brand-title{font-weight:700;color:#fff}
+.brand-sub{font-size:0.8rem;color:#ddd}
+.btn-ghost{background:transparent;border:none;padding:6px}
+.bg-orange{background:var(--accent);color:#fff}
+.btn-orange{background:var(--accent);color:#fff;border:none;padding:10px;border-radius:8px}
+.card{border-radius:12px}
+.page{display:none}
+.page.active{display:block}
+.badge.bg-orange{background:var(--accent);color:#fff}
+.bottom-nav .nav-btn{background:transparent;border:none;padding:8px 6px;text-align:center;color:#222;font-size:13px}
+.offcanvas{width:260px}
 
-body.dark-mode {
-  background-color: #121212;
-  color: #eaeaea;
+/* dark mode */
+body.dark{
+  --bg:#0b0b0b;
+  --text:#eaeaea;
+  --muted:#151515;
 }
-
-/* ====== CARD ====== */
-.card {
-  border-radius: 12px;
-  border: none;
-}
-
-.card.shadow-sm {
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-}
-
-body.dark-mode .card {
-  background-color: #1e1e1e;
-  color: #eaeaea;
-}
-
-/* ====== NAVBAR ====== */
-.navbar {
-  padding: 0.5rem 1rem;
-}
-
-.navbar .btn {
-  border-radius: 8px;
-}
-
-/* ====== NAVBAR BOTTOM ====== */
-.navbar.fixed-bottom {
-  background: #ffffff;
-}
-
-.navbar.fixed-bottom .btn {
-  flex: 1;
-  border: none;
-  border-radius: 0;
-  font-size: 0.85rem;
-  padding: 8px 0;
-  color: #555;
-}
-
-.navbar.fixed-bottom .btn:hover {
-  background-color: #f1f1f1;
-}
-
-body.dark-mode .navbar.fixed-bottom {
-  background-color: #1e1e1e;
-}
-
-body.dark-mode .navbar.fixed-bottom .btn {
-  color: #eaeaea;
-}
-
-/* ====== OFFCANVAS MENU ====== */
-.offcanvas {
-  width: 250px;
-}
-
-.offcanvas-body .btn {
-  text-align: left;
-  border-radius: 8px;
-  margin-bottom: 10px;
-}
-
-body.dark-mode .offcanvas {
-  background-color: #1e1e1e;
-  color: #eaeaea;
-}
-
-/* ====== TITLES ====== */
-h3 {
-  font-size: 1.2rem;
-  margin-bottom: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-weight: 600;
-}
-
-h3 i {
-  font-size: 1.3rem;
-  color: #0d6efd;
-}
-
-/* ====== BUTTONS ====== */
-.btn {
-  border-radius: 8px;
-}
-
-.btn-success, .btn-primary {
-  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-}
-
-/* ====== FORM ====== */
-.form-control, .form-select {
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  padding: 0.6rem;
-}
-
-body.dark-mode .form-control,
-body.dark-mode .form-select {
-  background-color: #2a2a2a;
-  border: 1px solid #444;
-  color: #fff;
-}
-
-/* ====== TEXTAREA ====== */
-textarea {
-  min-height: 60px;
-}
-
-/* ====== DARK MODE SPECIAL ====== */
-body.dark-mode h3 i {
-  color: #ffc107;
-}
+body.dark .header, body.dark .offcanvas{background:#0b0b0b}
+body.dark .brand-title{color:#fff}
+body.dark .brand-sub{color:#ccc}
+body.dark .card{background:#121212;border:1px solid #222;color:#eaeaea}
+body.dark .bottom-nav{background:#0b0b0b}
