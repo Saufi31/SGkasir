@@ -1,574 +1,237 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Kasir Konter — Final UI</title>
-
-  <!-- cache control -->
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
-
-  <!-- bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aplikasi Kasir Konter</title>
   <style>
-    :root{
-      --bg:#0b0b0b;
-      --card:#111214;
-      --text:#e8e8e8;
-      --muted:#9aa0a6;
-      --accent:#ff7a00; /* orange */
-      --accent-strong:#ff8f33;
-      --btn-blue:#3aa3ff;
+    body {
+      margin:0; font-family:sans-serif;
+      background:#121212; color:#eee;
     }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text)}
-    /* header */
-    .app-header{position:fixed;top:0;left:0;right:0;height:64px;background:linear-gradient(90deg,#070707 0%, #0f0f0f 100%);z-index:1030;display:flex;align-items:center;padding:8px 12px;gap:12px}
-    .brand {display:flex;align-items:center;gap:10px}
-    .brand img{height:38px;width:38px;border-radius:8px;object-fit:cover}
-    .brand .title{font-weight:700}
-    .brand .sub{font-size:12px;color:var(--muted)}
-    .header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
-    .status-pill{background:#141414;padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px}
-
-    /* main */
-    main.container{padding-top:84px;padding-bottom:86px;max-width:960px}
-    .card-ui{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.03)}
-    label.small{font-size:12px;color:var(--muted)}
-
-    input.form-control, select.form-select, textarea.form-control{
-      background:#0f0f10;border:1px solid rgba(255,255,255,0.03);color:var(--text);
-      border-radius:8px;padding:12px;
+    header {
+      background:#000; color:orange;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:10px;
     }
-
-    .btn-accent{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 12px}
-    .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text);border-radius:10px;padding:10px 12px}
-
-    .page-section{display:none}
-    .page-section.active{display:block}
-
-    /* bottom nav */
-    .bottom-nav{position:fixed;left:0;right:0;bottom:0;height:72px;background:#070707;display:flex;align-items:center;justify-content:center;border-top:1px solid rgba(255,255,255,0.03);z-index:1030}
-    .bottom-nav .nav-grid{width:100%;max-width:960px;display:flex;justify-content:space-around;padding:8px}
-    .nav-item{display:flex;flex-direction:column;align-items:center;color:var(--muted);font-size:12px;border-radius:10px;padding:8px 6px}
-    .nav-item.active{background:linear-gradient(180deg, rgba(255,122,0,0.08), rgba(255,122,0,0.04));color:var(--accent-strong);}
-
-    /* offcanvas width */
-    .offcanvas{width:280px;background:#060606}
-
-    /* small responsive */
-    @media (max-width:420px){
-      .brand .title{font-size:14px}
-      .brand .sub{display:none}
+    header img { height:32px; margin-right:8px; }
+    header .title { display:flex; align-items:center; }
+    nav.bottom {
+      position:fixed; bottom:0; left:0; right:0;
+      display:flex; justify-content:space-around;
+      background:#000; border-top:1px solid #333;
     }
-
-    /* light mode support */
-    body.light { --bg:#ffffff; --card:#f8f8f8; --text:#111; --muted:#6b7280; }
-    body.light .btn-accent{color:#111}
+    nav.bottom button {
+      flex:1; padding:10px; background:none; border:none; color:#eee;
+    }
+    nav.bottom button.active { color:orange; font-weight:bold; }
+    #burgerMenu {
+      position:fixed; top:0; left:-250px; width:250px; height:100%;
+      background:#222; padding:20px; transition:0.3s; z-index:1000;
+    }
+    #burgerMenu.active { left:0; }
+    #burgerMenu a { display:block; padding:8px; color:#eee; text-decoration:none; }
+    main { padding:15px; margin-bottom:60px; }
+    .form-control { width:100%; padding:8px; margin-bottom:10px; }
+    .btn { padding:10px; border:none; cursor:pointer; }
+    .btn-primary { background:orange; color:#000; }
+    .btn-secondary { background:#555; color:#fff; }
+    ul { list-style:none; padding:0; }
+    li { padding:8px; border-bottom:1px solid #444; }
+    .dark { background:#121212; color:#eee; }
+    .light { background:#fff; color:#000; }
   </style>
 </head>
-<body>
-
-  <!-- header -->
-  <div class="app-header">
-    <button class="btn-ghost" data-bs-toggle="offcanvas" data-bs-target="#sidebar" aria-controls="sidebar" title="Menu">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h16" stroke="white" stroke-width="1.4" stroke-linecap="round"/></svg>
-    </button>
-
-    <div class="brand">
-      <!-- replace logo.png manually if you want -->
-      <img id="logoHeader" src="logo.png" alt="logo" onerror="this.style.display='none'">
+<body class="dark">
+  <header>
+    <div class="title">
+      <img src="logo.png" alt="Logo">
       <div>
-        <div class="title">Kasir Multi Saldo</div>
-        <div class="sub">Offline · localStorage</div>
+        <div>Nama Konter</div>
+        <small>Status: Offline</small>
       </div>
     </div>
-
-    <div class="header-actions">
-      <div class="status-pill">Offline · localStorage</div>
-      <button id="userBtn" class="btn-ghost" title="Admin">Admin</button>
-      <button id="themeToggle" class="btn-ghost" title="Toggle theme">
-        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="white" stroke-width="1.2"/></svg>
-      </button>
+    <div>
+      <button onclick="toggleMenu()">☰</button>
+      <button onclick="toggleTheme()">🌙</button>
     </div>
+  </header>
+
+  <div id="burgerMenu">
+    <a href="#" onclick="showPage('pemasukan')">Pemasukan</a>
+    <a href="#" onclick="showPage('pengeluaran')">Pengeluaran</a>
+    <a href="#" onclick="showPage('saldo')">Saldo Bank</a>
+    <a href="#" onclick="showPage('stok')">Stok Barang</a>
+    <a href="#" onclick="showPage('hutang')">Hutang Piutang</a>
+    <a href="#" onclick="showPage('audit')">Audit Stok</a>
+    <a href="#" onclick="showPage('pengaturan')">Pengaturan</a>
   </div>
 
-  <!-- sidebar offcanvas -->
-  <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebar">
-    <div class="offcanvas-header">
-      <h5 class="offcanvas-title text-white">Menu</h5>
-      <button type="button" class="btn-ghost" data-bs-dismiss="offcanvas">✕</button>
-    </div>
-    <div class="offcanvas-body">
-      <div class="list-group list-group-flush">
-        <button class="list-group-item list-group-item-action bg-transparent text-start text-white" onclick="showSection('pemasukan')" data-bs-dismiss="offcanvas">Pemasukan</button>
-        <button class="list-group-item list-group-item-action bg-transparent text-start text-white" onclick="showSection('pengeluaran')" data-bs-dismiss="offcanvas">Pengeluaran</button>
-        <button class="list-group-item list-group-item-action bg-transparent text-start text-white" onclick="showSection('saldo')" data-bs-dismiss="offcanvas">Saldo Akun</button>
-        <button class="list-group-item list-group-item-action bg-transparent text-start text-white" onclick="showSection('stok')" data-bs-dismiss="offcanvas">Stok Barang</button>
-        <button class="list-group-item list-group-item-action bg-transparent text-start text-white" onclick="showSection('hutang')" data-bs-dismiss="offcanvas">Hutang / Piutang</button>
-        <button class="list-group-item list-group-item-action bg-transparent text-start text-white" onclick="showSection('audit')" data-bs-dismiss="offcanvas">Audit Stok</button>
-        <button class="list-group-item list-group-item-action bg-transparent text-start text-white" onclick="showSection('pengaturan')" data-bs-dismiss="offcanvas">Pengaturan</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- main -->
-  <main class="container">
-
-    <!-- TRANSAKSI (Digital example) -->
-    <section id="digital" class="page-section active">
-      <div class="card-ui">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-          <h5 class="mb-0">Transaksi Digital</h5>
-          <div class="badge" id="miniSaldo" style="background:transparent;color:var(--muted);font-size:13px"></div>
-        </div>
-
-        <div class="mb-2">
-          <label class="small">Tanggal</label>
-          <input id="tglTransaksi" type="date" class="form-control" />
-        </div>
-
-        <div class="mb-2">
-          <label class="small">Akun Saldo</label>
-          <select id="akunTransaksi" class="form-select"></select>
-        </div>
-
-        <div class="mb-2">
-          <label class="small">Jenis</label>
-          <select id="jenisTransaksi" class="form-select">
-            <option>Penjualan</option>
-            <option>Topup</option>
-            <option>Tarik Tunai</option>
-            <option>Transfer</option>
-          </select>
-        </div>
-
-        <div class="row gx-2">
-          <div class="col-6">
-            <label class="small">Harga Beli</label>
-            <input id="hargaBeli" type="number" class="form-control" value="0" />
-          </div>
-          <div class="col-6">
-            <label class="small">Harga Jual</label>
-            <input id="hargaJual" type="number" class="form-control" value="0" />
-          </div>
-        </div>
-
-        <div class="mb-2 mt-2">
-          <label class="small">Deskripsi</label>
-          <input id="descTrans" class="form-control" placeholder="Keterangan (opsional)" />
-        </div>
-
-        <div class="d-flex gap-2 mt-3">
-          <button class="btn-accent flex-fill" onclick="simpanTransaksi()">Simpan</button>
-          <button class="btn-ghost flex-fill" onclick="bersihkanForm()">Bersihkan</button>
-        </div>
-      </div>
+  <main>
+    <!-- Transaksi -->
+    <section id="transaksi">
+      <h2>Transaksi</h2>
+      <input id="nama" class="form-control" placeholder="Nama Produk">
+      <input id="hargaBeli" type="number" class="form-control" placeholder="Harga Beli (Rp)">
+      <input id="hargaJual" type="number" class="form-control" placeholder="Harga Jual (Rp)">
+      <input id="laba" type="number" class="form-control" placeholder="Laba" readonly>
+      <select id="akun" class="form-control"></select>
+      <button class="btn btn-primary" onclick="simpanTransaksi()">Simpan</button>
+      <button class="btn btn-secondary" onclick="resetForm()">Bersihkan</button>
     </section>
 
-    <!-- FISIK (placeholder same layout) -->
-    <section id="fisik" class="page-section">
-      <div class="card-ui">
-        <h5>Transaksi Fisik</h5>
-        <!-- reuse same inputs -->
-        <div class="mb-2">
-          <label class="small">Nama Produk</label>
-          <input id="namaProduk" class="form-control" placeholder="Contoh: Casing HP" />
-        </div>
-        <div class="mb-2">
-          <label class="small">Harga</label>
-          <input id="hargaProduk" type="number" class="form-control" value="0" />
-        </div>
-        <div class="d-flex gap-2 mt-2">
-          <button class="btn-accent flex-fill" onclick="simpanTransaksi()">Simpan</button>
-          <button class="btn-ghost flex-fill" onclick="bersihkanForm()">Bersihkan</button>
-        </div>
-      </div>
+    <!-- History -->
+    <section id="history" style="display:none">
+      <h2>History</h2>
+      <ul id="historyList"></ul>
     </section>
 
-    <!-- HISTORY -->
-    <section id="history" class="page-section">
-      <div class="card-ui">
-        <h5>History</h5>
-        <div class="mt-2 mb-2">
-          <textarea id="catatanShare" class="form-control" rows="2" placeholder="Catatan untuk print/share"></textarea>
-        </div>
-        <div class="d-flex gap-2 mb-2">
-          <button class="btn-ghost" onclick="exportCSV()">Export CSV</button>
-          <button class="btn-ghost" onclick="downloadJSON()">Backup JSON</button>
-        </div>
-        <ul id="historyList" class="list-group mt-2"></ul>
-      </div>
+    <!-- Rekap -->
+    <section id="rekap" style="display:none">
+      <h2>Rekap</h2>
+      <p>Omzet: Rp <span id="rekapOmzet">0</span></p>
+      <p>Total Laba: Rp <span id="rekapLaba">0</span></p>
+      <ul id="akunList"></ul>
     </section>
 
-    <!-- REKAP -->
-    <section id="rekap" class="page-section">
-      <div class="card-ui">
-        <h5>Rekap</h5>
-        <div class="row">
-          <div class="col-6">
-            <p class="mb-1 small">Omzet</p>
-            <h4 id="rekapOmzet">Rp 0</h4>
-          </div>
-          <div class="col-6">
-            <p class="mb-1 small">Saldo Total</p>
-            <h4 id="rekapSaldo">Rp 0</h4>
-          </div>
-        </div>
-        <hr />
-        <h6 class="mb-2">Saldo Per Akun</h6>
-        <ul id="akunList" class="list-group"></ul>
-      </div>
+    <!-- Pemasukan -->
+    <section id="pemasukan" style="display:none">
+      <h2>Pemasukan</h2>
+      <input id="namaPemasukan" class="form-control" placeholder="Nama Pemasukan">
+      <input id="jumlahPemasukan" type="number" class="form-control" placeholder="Jumlah (Rp)">
+      <select id="akunPemasukan" class="form-control"></select>
+      <button class="btn btn-primary" onclick="tambahPemasukan()">Simpan</button>
     </section>
 
-    <!-- PEMASUKAN -->
-    <section id="pemasukan" class="page-section">
-      <div class="card-ui">
-        <h5>Pemasukan Manual</h5>
-        <input id="jumlahPemasukan" type="number" class="form-control mb-2" placeholder="Jumlah (Rp)" />
-        <input id="ketPemasukan" class="form-control mb-2" placeholder="Keterangan (opsional)" />
-        <button class="btn-accent w-100" onclick="tambahPemasukan()">Simpan Pemasukan</button>
-      </div>
+    <!-- Pengeluaran -->
+    <section id="pengeluaran" style="display:none">
+      <h2>Pengeluaran</h2>
+      <input id="namaPengeluaran" class="form-control" placeholder="Nama Pengeluaran">
+      <input id="jumlahPengeluaran" type="number" class="form-control" placeholder="Jumlah (Rp)">
+      <select id="akunPengeluaran" class="form-control"></select>
+      <button class="btn btn-primary" onclick="tambahPengeluaran()">Simpan</button>
     </section>
-
-    <!-- PENGELUARAN -->
-    <section id="pengeluaran" class="page-section">
-      <div class="card-ui">
-        <h5>Pengeluaran Manual</h5>
-        <input id="jumlahPengeluaran" type="number" class="form-control mb-2" placeholder="Jumlah (Rp)"/>
-        <input id="ketPengeluaran" class="form-control mb-2" placeholder="Keterangan (opsional)"/>
-        <button class="btn-accent w-100" onclick="tambahPengeluaran()">Simpan Pengeluaran</button>
-      </div>
-    </section>
-
-    <!-- SALDO AKUN -->
-    <section id="saldo" class="page-section">
-      <div class="card-ui">
-        <h5>Saldo Akun</h5>
-        <table class="table table-dark table-striped">
-          <thead><tr><th>Akun</th><th>Saldo</th></tr></thead>
-          <tbody id="saldoTable"></tbody>
-        </table>
-        <input id="namaAkunBaru" class="form-control mb-2" placeholder="Nama akun baru"/>
-        <input id="saldoAwal" type="number" class="form-control mb-2" placeholder="Saldo awal (Rp)"/>
-        <button class="btn-accent w-100" onclick="tambahAkun()">Tambah Akun</button>
-      </div>
-    </section>
-
-    <!-- STOK -->
-    <section id="stok" class="page-section">
-      <div class="card-ui">
-        <h5>Stok Barang</h5>
-        <table class="table table-dark table-striped"><thead><tr><th>Nama</th><th>Stok</th><th>Harga</th></tr></thead><tbody id="stokTable"></tbody></table>
-        <input id="namaBarang" class="form-control mb-2" placeholder="Nama barang"/>
-        <input id="stokJumlah" type="number" class="form-control mb-2" placeholder="Jumlah"/>
-        <input id="stokHarga" type="number" class="form-control mb-2" placeholder="Harga"/>
-        <button class="btn-accent w-100" onclick="tambahStok()">Tambah Barang</button>
-      </div>
-    </section>
-
-    <!-- HUTANG -->
-    <section id="hutang" class="page-section">
-      <div class="card-ui">
-        <h5>Hutang / Piutang</h5>
-        <table class="table table-dark table-striped"><thead><tr><th>Nama</th><th>Jumlah</th><th>Tipe</th></tr></thead><tbody id="hutangTable"></tbody></table>
-        <input id="namaHutang" class="form-control mb-2" placeholder="Nama"/>
-        <input id="jumlahHutang" type="number" class="form-control mb-2" placeholder="Jumlah"/>
-        <select id="tipeHutang" class="form-select mb-2"><option>Hutang</option><option>Piutang</option></select>
-        <button class="btn-accent w-100" onclick="tambahHutang()">Simpan</button>
-      </div>
-    </section>
-
-    <!-- AUDIT -->
-    <section id="audit" class="page-section">
-      <div class="card-ui">
-        <h5>Audit Stok</h5>
-        <div id="auditResult" style="white-space:pre-wrap;color:var(--muted)"></div>
-        <button class="btn-accent w-100 mt-2" onclick="auditStok()">Cek Audit</button>
-      </div>
-    </section>
-
-    <!-- PENGATURAN -->
-    <section id="pengaturan" class="page-section">
-      <div class="card-ui">
-        <h5>Pengaturan</h5>
-        <label class="small">Catatan untuk print/share</label>
-        <textarea id="catatanPengaturan" class="form-control mb-2" rows="2" placeholder="Alamat / Nomor HP"></textarea>
-        <div class="d-grid gap-2">
-          <button class="btn-ghost" onclick="exportCSV()">Export CSV</button>
-          <button class="btn-ghost" onclick="downloadJSON()">Download JSON</button>
-          <button class="btn-ghost" onclick="printHistory()">Print</button>
-          <button class="btn-ghost" onclick="shareTXT()">Share TXT</button>
-          <button class="btn-ghost" onclick="sharePNG()">Share PNG</button>
-          <button class="btn btn-danger" onclick="resetData()">Reset Semua Data</button>
-        </div>
-      </div>
-    </section>
-
   </main>
 
-  <!-- bottom nav -->
-  <div class="bottom-nav">
-    <div class="nav-grid">
-      <div class="nav-item" id="tab-fisik" onclick="activateTab('fisik')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="6" height="6" rx="1" fill="#ff7a00"/></svg>
-        <div>Fisik</div>
-      </div>
-      <div class="nav-item active" id="tab-digital" onclick="activateTab('digital')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" fill="#ff7a00"/></svg>
-        <div>Digital</div>
-      </div>
-      <div class="nav-item" id="tab-history" onclick="activateTab('history')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 6v6l4 2" stroke="#9aa0a6" stroke-width="2" stroke-linecap="round"/></svg>
-        <div>History</div>
-      </div>
-      <div class="nav-item" id="tab-rekap" onclick="activateTab('rekap')">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M4 19h16" stroke="#9aa0a6" stroke-width="2"/><path d="M7 12v7" stroke="#9aa0a6" stroke-width="2"/><path d="M12 7v12" stroke="#9aa0a6" stroke-width="2"/><path d="M17 4v15" stroke="#9aa0a6" stroke-width="2"/></svg>
-        <div>Rekap</div>
-      </div>
-    </div>
-  </div>
+  <nav class="bottom">
+    <button onclick="showPage('transaksi')" class="active">Transaksi</button>
+    <button onclick="showPage('history')">History</button>
+    <button onclick="showPage('rekap')">Rekap</button>
+  </nav>
 
-  <!-- libs -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <!-- app logic (tidak diubah) -->
   <script>
-  console.log("UI wrapper loaded");
+    let data = JSON.parse(localStorage.getItem("kasirData")) || {
+      transaksi: [],
+      akun: [{ nama:"Cash", saldo:0 }],
+      omzet:0,
+      labaTotal:0,
+      stok:[], hutang:[]
+    };
 
-  // core data (unchanged logic)
-  const KEY = 'sgkasir_final_v1';
-  let data = JSON.parse(localStorage.getItem(KEY)) || {
-    akun: [{ id:'acc0', nama: 'Cash', saldo: 0 }],
-    transaksi: [], pemasukan: [], pengeluaran: [], stok: [], hutang: [], note: ''
-  };
+    function save(){ localStorage.setItem("kasirData", JSON.stringify(data)); }
+    function toggleMenu(){ document.getElementById("burgerMenu").classList.toggle("active"); }
+    function toggleTheme(){
+      document.body.classList.toggle("light");
+      document.body.classList.toggle("dark");
+    }
+    function showPage(page){
+      document.querySelectorAll("main section").forEach(s=>s.style.display="none");
+      document.getElementById(page).style.display="block";
+      document.querySelectorAll("nav.bottom button").forEach(b=>b.classList.remove("active"));
+      document.querySelector(`nav.bottom button[onclick="showPage('${page}')"]`)?.classList.add("active");
+      if(page==="history") renderHistory();
+      if(page==="rekap") renderRekap();
+    }
+    function resetForm(){
+      document.getElementById("nama").value="";
+      document.getElementById("hargaBeli").value=0;
+      document.getElementById("hargaJual").value=0;
+      document.getElementById("laba").value=0;
+    }
+    function hitungLabaInput(){
+      let beli=parseInt(document.getElementById("hargaBeli").value)||0;
+      let jual=parseInt(document.getElementById("hargaJual").value)||0;
+      document.getElementById("laba").value=jual-beli;
+    }
+    document.getElementById("hargaBeli").addEventListener("input",hitungLabaInput);
+    document.getElementById("hargaJual").addEventListener("input",hitungLabaInput);
 
-  function save(){ localStorage.setItem(KEY, JSON.stringify(data)); }
-  function uid(p='id'){ return p + Date.now().toString(36); }
-  function now(){ return new Date().toLocaleString(); }
-  function fmt(n){ return Number(n||0).toLocaleString('id-ID'); }
-  function findAkun(id){ return data.akun.find(a=>a.id===id) || null; }
+    function simpanTransaksi(){
+      let nama=document.getElementById("nama").value;
+      let beli=parseInt(document.getElementById("hargaBeli").value)||0;
+      let jual=parseInt(document.getElementById("hargaJual").value)||0;
+      let laba=jual-beli;
+      let akunIdx=document.getElementById("akun").selectedIndex;
+      let akun=data.akun[akunIdx].nama;
+      let t={ nama,hargaBeli:beli,hargaJual:jual,laba,akun,tanggal:new Date().toLocaleString() };
+      data.transaksi.push(t);
+      data.omzet+=jual;
+      data.labaTotal+=laba;
+      data.akun[akunIdx].saldo+=jual-beli;
+      save(); resetForm();
+      alert("Transaksi tersimpan");
+    }
 
-  // render helpers
-  function renderAll(){
-    renderAkunSelect();
-    renderHistory();
-    renderRekap();
-    renderStok();
-    renderHutang();
-    renderSaldoTable();
-    renderAudit();
-    renderMiniSaldo();
-  }
+    function tambahPemasukan(){
+      let nama=document.getElementById("namaPemasukan").value;
+      let jumlah=parseInt(document.getElementById("jumlahPemasukan").value)||0;
+      let akunIdx=document.getElementById("akunPemasukan").selectedIndex;
+      let akun=data.akun[akunIdx].nama;
+      let t={ nama,hargaBeli:0,hargaJual:jumlah,laba:jumlah,akun,tanggal:new Date().toLocaleString() };
+      data.transaksi.push(t);
+      data.omzet+=jumlah;
+      data.labaTotal+=jumlah;
+      data.akun[akunIdx].saldo+=jumlah;
+      save();
+      alert("Pemasukan tersimpan");
+    }
 
-  function renderAkunSelect(){
-    const sel = document.getElementById('akunTransaksi');
-    if(!sel) return;
-    sel.innerHTML = '';
-    data.akun.forEach(a=>{
-      const opt = document.createElement('option'); opt.value = a.id; opt.textContent = `${a.nama} (Rp ${fmt(a.saldo)})`;
-      sel.appendChild(opt);
-    });
-  }
+    function tambahPengeluaran(){
+      let nama=document.getElementById("namaPengeluaran").value;
+      let jumlah=parseInt(document.getElementById("jumlahPengeluaran").value)||0;
+      let akunIdx=document.getElementById("akunPengeluaran").selectedIndex;
+      let akun=data.akun[akunIdx].nama;
+      let t={ nama,hargaBeli:jumlah,hargaJual:0,laba:-jumlah,akun,tanggal:new Date().toLocaleString() };
+      data.transaksi.push(t);
+      data.labaTotal-=jumlah;
+      data.akun[akunIdx].saldo-=jumlah;
+      save();
+      alert("Pengeluaran tersimpan");
+    }
 
-  function renderHistory(){
-    const el = document.getElementById('historyList'); if(!el) return; el.innerHTML='';
-    data.transaksi.concat(data.pemasukan).concat(data.pengeluaran).forEach(t=>{
-      const li = document.createElement('li'); li.className='list-group-item'; 
-      if(t.harga !== undefined){
-        li.textContent = `${t.tanggal || now()} | ${t.nama || t.ket || ''} • Rp ${fmt(t.harga || 0)} ${t.akun ? '('+t.akun+')':''}`;
-      } else if(t.jumlah !== undefined){
-        li.textContent = `${t.tanggal || now()} | ${t.ket || t.nama || ''} • Rp ${fmt(t.jumlah || 0)}`;
-      } else {
-        li.textContent = JSON.stringify(t);
-      }
-      el.appendChild(li);
-    });
-  }
+    function renderHistory(){
+      let ul=document.getElementById("historyList"); ul.innerHTML="";
+      data.transaksi.slice().reverse().forEach(t=>{
+        let li=document.createElement("li");
+        li.textContent=`${t.tanggal} | ${t.nama} | Jual Rp${t.hargaJual} | Beli Rp${t.hargaBeli} | Laba Rp${t.laba} (${t.akun})`;
+        ul.appendChild(li);
+      });
+    }
 
-  function renderRekap(){
-    const omzet = data.transaksi.reduce((s,t)=> s + (t.harga||0),0) + data.pemasukan.reduce((s,p)=>s+(p.jumlah||0),0);
-    const saldoTotal = data.akun.reduce((s,a)=>s+(a.saldo||0),0);
-    document.getElementById('rekapOmzet').textContent = 'Rp ' + fmt(omzet);
-    document.getElementById('rekapSaldo').textContent = 'Rp ' + fmt(saldoTotal);
-    renderAkunList();
-  }
+    function renderRekap(){
+      document.getElementById("rekapOmzet").textContent=data.omzet;
+      document.getElementById("rekapLaba").textContent=data.labaTotal;
+      let ul=document.getElementById("akunList"); ul.innerHTML="";
+      data.akun.forEach(a=>{
+        let li=document.createElement("li");
+        li.textContent=`${a.nama}: Rp${a.saldo}`;
+        ul.appendChild(li);
+      });
+    }
 
-  function renderAkunList(){
-    const ul = document.getElementById('akunList'); if(!ul) return; ul.innerHTML='';
-    data.akun.forEach(a=> ul.insertAdjacentHTML('beforeend', `<li class="list-group-item">${a.nama} • Rp ${fmt(a.saldo)}</li>`));
-  }
+    function renderAkun(){
+      let sel=document.getElementById("akun"); sel.innerHTML="";
+      let sel2=document.getElementById("akunPemasukan"); sel2.innerHTML="";
+      let sel3=document.getElementById("akunPengeluaran"); sel3.innerHTML="";
+      data.akun.forEach(a=>{
+        let opt=document.createElement("option"); opt.textContent=a.nama;
+        let opt2=opt.cloneNode(true);
+        let opt3=opt.cloneNode(true);
+        sel.appendChild(opt); sel2.appendChild(opt2); sel3.appendChild(opt3);
+      });
+    }
 
-  function renderSaldoTable(){
-    const t = document.getElementById('saldoTable'); if(!t) return; t.innerHTML='';
-    data.akun.forEach(a=> t.insertAdjacentHTML('beforeend', `<tr><td>${a.nama}</td><td>Rp ${fmt(a.saldo)}</td></tr>`));
-  }
-
-  function renderStok(){
-    const tb = document.getElementById('stokTable'); if(!tb) return; tb.innerHTML='';
-    data.stok.forEach(s=> tb.insertAdjacentHTML('beforeend', `<tr><td>${s.nama}</td><td>${s.jumlah}</td><td>Rp ${fmt(s.harga)}</td></tr>`));
-  }
-
-  function renderHutang(){
-    const tb = document.getElementById('hutangTable'); if(!tb) return; tb.innerHTML='';
-    data.hutang.forEach(h=> tb.insertAdjacentHTML('beforeend', `<tr><td>${h.nama}</td><td>Rp ${fmt(h.jumlah)}</td><td>${h.tipe}</td></tr>`));
-  }
-
-  function renderAudit(){
-    const out = data.stok.map(s=> `${s.nama}: ${s.jumlah}`).join('\\n');
-    document.getElementById('auditResult').textContent = out || 'Tidak ada barang';
-  }
-
-  function renderMiniSaldo(){
-    const el = document.getElementById('miniSaldo'); if(!el) return;
-    const tot = data.akun.reduce((s,a)=> s + (a.saldo||0), 0);
-    el.textContent = 'Saldo: Rp ' + fmt(tot);
-  }
-
-  // actions (logic preserved)
-  function simpanTransaksi(){
-    // apply minimal mapping from UI to logic used before
-    const tgl = document.getElementById('tglTransaksi')?.value || now();
-    const akunId = document.getElementById('akunTransaksi')?.value || (data.akun[0] && data.akun[0].id);
-    const jenis = document.getElementById('jenisTransaksi')?.value || 'Penjualan';
-    const hargaJual = parseInt(document.getElementById('hargaJual')?.value) || 0;
-    const hargaBeli = parseInt(document.getElementById('hargaBeli')?.value) || 0;
-    const desc = document.getElementById('descTrans')?.value || '';
-
-    if(hargaJual <= 0) return alert('Isi nominal jual > 0');
-    const akun = data.akun.find(a=>a.id===akunId) || data.akun[0];
-    akun.saldo += hargaJual;
-    data.transaksi.unshift({ id: uid('tx_'), tanggal: tgl, jenis, nama: desc || jenis, harga: hargaJual, akun: akun.nama });
-    save(); renderAll();
-    alert('Transaksi tersimpan');
-  }
-
-  function bersihkanForm(){
-    ['namaProduk','hargaProduk','hargaJual','hargaBeli','descTrans'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
-  }
-
-  function tambahPemasukan(){
-    const j = parseInt(document.getElementById('jumlahPemasukan')?.value) || 0;
-    const ket = document.getElementById('ketPemasukan')?.value || 'Pemasukan';
-    if(j<=0) return alert('Jumlah tidak valid');
-    data.pemasukan.unshift({ id: uid('in_'), tanggal: now(), jumlah: j, ket });
-    data.akun[0].saldo += j;
-    save(); renderAll();
-  }
-
-  function tambahPengeluaran(){
-    const j = parseInt(document.getElementById('jumlahPengeluaran')?.value) || 0;
-    const ket = document.getElementById('ketPengeluaran')?.value || 'Pengeluaran';
-    if(j<=0) return alert('Jumlah tidak valid');
-    data.pengeluaran.unshift({ id: uid('out_'), tanggal: now(), jumlah: j, ket });
-    data.akun[0].saldo -= j;
-    save(); renderAll();
-  }
-
-  function tambahAkun(){
-    const n = document.getElementById('namaAkunBaru')?.value?.trim();
-    const s = parseInt(document.getElementById('saldoAwal')?.value) || 0;
-    if(!n) return alert('Isi nama akun');
-    data.akun.push({ id: uid('acc_'), nama: n, saldo: s });
-    save(); renderAll();
-  }
-
-  function tambahStok(){
-    const n = document.getElementById('namaBarang')?.value?.trim();
-    const j = parseInt(document.getElementById('stokJumlah')?.value) || 0;
-    const h = parseInt(document.getElementById('stokHarga')?.value) || 0;
-    if(!n||j<=0) return alert('Isi data stok valid');
-    data.stok.unshift({ id: uid('s_'), nama: n, jumlah: j, harga: h });
-    save(); renderAll();
-  }
-
-  function tambahHutang(){
-    const n = document.getElementById('namaHutang')?.value?.trim();
-    const j = parseInt(document.getElementById('jumlahHutang')?.value) || 0;
-    const tipe = document.getElementById('tipeHutang')?.value || 'Hutang';
-    if(!n||j<=0) return alert('Isi hutang/piutang valid');
-    data.hutang.unshift({ id: uid('h_'), nama: n, jumlah: j, tipe });
-    save(); renderAll();
-  }
-
-  function auditStok(){ renderAudit(); alert('Audit ditampilkan'); }
-
-  function exportCSV(){
-    const rows=[['Tanggal','Tipe','Keterangan','Jumlah','Akun']];
-    data.transaksi.forEach(t=> rows.push([t.tanggal,t.jenis||'Transaksi',t.nama||'',t.harga||0,t.akun||'']));
-    data.pemasukan.forEach(p=> rows.push([p.tanggal,'Pemasukan',p.ket||'',p.jumlah||0,'']));
-    data.pengeluaran.forEach(q=> rows.push([q.tanggal,'Pengeluaran',q.ket||'',q.jumlah||0,'']));
-    const csv = rows.map(r=> r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\\n');
-    const blob = new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download='history.csv'; a.click();
-  }
-
-  function downloadJSON(){ const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='sgkasir_backup.json'; a.click(); }
-
-  function printHistory(){ const note=document.getElementById('catatanShare')?.value||data.note||''; const w=window.open('','_blank'); w.document.write(`<pre>${note}\\n\\n${JSON.stringify(data,null,2)}</pre>`); w.print(); w.close(); }
-
-  function shareTXT(){ const note=document.getElementById('catatanShare')?.value||data.note||''; let txt=note+'\\n\\n'; data.transaksi.forEach(t=> txt+=`${t.tanggal} - ${t.nama} - Rp ${fmt(t.harga)}\\n`); const blob=new Blob([txt],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='sgkasir.txt'; a.click(); }
-
-  function sharePNG(){ html2canvas(document.querySelector('main')).then(canvas=>{ canvas.toBlob(blob=>{ const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='sgkasir.png'; a.click(); }); }); }
-
-  function resetData(){ if(!confirm('Yakin reset semua data?')) return; localStorage.removeItem(KEY); location.reload(); }
-
-  // UI navigation
-  function activateTab(id){
-    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-    document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
-    // set nav active
-    const tabMap = {fisik:'tab-fisik', digital:'tab-digital', history:'tab-history', rekap:'tab-rekap'};
-    const elTab = document.getElementById(tabMap[id]);
-    if(elTab) elTab.classList.add('active');
-    const section = document.getElementById(id);
-    if(section) section.classList.add('active');
-    // render targeted
-    if(id==='history') renderHistory();
-    if(id==='rekap') renderRekap();
-    if(id==='saldo') renderSaldoTable();
-    // close offcanvas if open
-    document.querySelectorAll('.offcanvas.show').forEach(off=> bootstrap.Offcanvas.getInstance(off).hide());
-  }
-
-  // theme toggle
-  (function initTheme(){
-    const saved = localStorage.getItem(KEY + '_theme'); if(saved==='light'){ document.body.classList.remove('dark-mode'); document.body.classList.add('light'); }
-    document.getElementById('themeToggle').addEventListener('click', ()=> {
-      if(document.body.classList.contains('light')){
-        document.body.classList.remove('light');
-        localStorage.setItem(KEY + '_theme','dark');
-      } else {
-        document.body.classList.add('light');
-        localStorage.setItem(KEY + '_theme','light');
-      }
-    });
-  })();
-
-  // expose global handlers for onclick in HTML
-  window.simpanTransaksi = simpanTransaksi;
-  window.bersihkanForm = bersihkanForm;
-  window.tambahPemasukan = tambahPemasukan;
-  window.tambahPengeluaran = tambahPengeluaran;
-  window.tambahAkun = tambahAkun;
-  window.tambahStok = tambahStok;
-  window.tambahHutang = tambahHutang;
-  window.auditStok = auditStok;
-  window.exportCSV = exportCSV;
-  window.downloadJSON = downloadJSON;
-  window.printHistory = printHistory;
-  window.shareTXT = shareTXT;
-  window.sharePNG = sharePNG;
-  window.resetData = resetData;
-  window.showSection = function(id){ activateTab(id==='transaksi'?'digital':id); };
-
-  // init
-  renderAll();
-  // default tab active
-  activateTab('digital');
+    renderAkun();
   </script>
 </body>
 </html>
