@@ -1,237 +1,796 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Aplikasi Kasir Konter</title>
-  <style>
-    body {
-      margin:0; font-family:sans-serif;
-      background:#121212; color:#eee;
-    }
-    header {
-      background:#000; color:orange;
-      display:flex; align-items:center; justify-content:space-between;
-      padding:10px;
-    }
-    header img { height:32px; margin-right:8px; }
-    header .title { display:flex; align-items:center; }
-    nav.bottom {
-      position:fixed; bottom:0; left:0; right:0;
-      display:flex; justify-content:space-around;
-      background:#000; border-top:1px solid #333;
-    }
-    nav.bottom button {
-      flex:1; padding:10px; background:none; border:none; color:#eee;
-    }
-    nav.bottom button.active { color:orange; font-weight:bold; }
-    #burgerMenu {
-      position:fixed; top:0; left:-250px; width:250px; height:100%;
-      background:#222; padding:20px; transition:0.3s; z-index:1000;
-    }
-    #burgerMenu.active { left:0; }
-    #burgerMenu a { display:block; padding:8px; color:#eee; text-decoration:none; }
-    main { padding:15px; margin-bottom:60px; }
-    .form-control { width:100%; padding:8px; margin-bottom:10px; }
-    .btn { padding:10px; border:none; cursor:pointer; }
-    .btn-primary { background:orange; color:#000; }
-    .btn-secondary { background:#555; color:#fff; }
-    ul { list-style:none; padding:0; }
-    li { padding:8px; border-bottom:1px solid #444; }
-    .dark { background:#121212; color:#eee; }
-    .light { background:#fff; color:#000; }
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Kasir Konter — Full</title>
+<style>
+  :root{
+    --bg:#0b0b0b; --card:#111214; --text:#e8e8e8; --muted:#9aa0a6; --accent:#ff7a00;
+  }
+  html,body{height:100%;margin:0;font-family:Inter,system-ui,Arial;background:var(--bg);color:var(--text)}
+  /* header */
+  .app-header{position:fixed;top:0;left:0;right:0;height:64px;background:#000;z-index:1030;display:flex;align-items:center;padding:8px 12px;gap:12px}
+  .brand{display:flex;align-items:center;gap:10px}
+  .brand img{height:36px;width:36px;border-radius:6px;object-fit:cover}
+  .brand .title{font-weight:700}
+  .brand .sub{font-size:12px;color:var(--muted)}
+  .header-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .status-pill{background:#141414;padding:6px 10px;border-radius:999px;color:var(--muted);font-size:12px}
+  /* main */
+  main.container{padding-top:84px;padding-bottom:92px;max-width:980px;margin:0 auto}
+  .card-ui{background:var(--card);border-radius:12px;padding:14px;margin-bottom:14px;border:1px solid rgba(255,255,255,0.03)}
+  label.small{font-size:12px;color:var(--muted)}
+  input.form-control, select.form-select, textarea.form-control{
+    background:#0f0f10;border:1px solid rgba(255,255,255,0.03);color:var(--text);
+    border-radius:8px;padding:12px;margin-bottom:10px;font-size:15px;
+  }
+  .btn-accent{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:10px 12px}
+  .btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--text);border-radius:10px;padding:8px 10px}
+  .page-section{display:none}
+  .page-section.active{display:block}
+  .bottom-nav{position:fixed;left:0;right:0;bottom:0;height:76px;background:#070707;display:flex;align-items:center;justify-content:center;border-top:1px solid rgba(255,255,255,0.03);z-index:1030}
+  .bottom-nav .nav-grid{width:100%;max-width:980px;display:flex;justify-content:space-around;padding:8px}
+  .nav-item{display:flex;flex-direction:column;align-items:center;color:var(--muted);font-size:12px;border-radius:10px;padding:6px 8px}
+  .nav-item.active{background:linear-gradient(180deg, rgba(255,122,0,0.08), rgba(255,122,0,0.04));color:var(--accent)}
+  table.table{width:100%;border-collapse:collapse}
+  table.table th, table.table td{padding:8px;border-bottom:1px solid rgba(255,255,255,0.03);text-align:left}
+  .small-muted{color:var(--muted);font-size:13px}
+  .chip{background:#1a1a1a;padding:6px 8px;border-radius:999px;color:var(--muted);font-size:13px}
+  /* responsive */
+  @media (max-width:600px){
+    .card-ui{padding:12px}
+    input.form-control, select.form-select, textarea.form-control{padding:12px;font-size:15px}
+    .brand .title{font-size:15px}
+  }
+  /* light mode */
+  body.light{background:#f7f7f7;color:#111}
+  body.light .card-ui{background:#fff;border:1px solid #e6e6e6}
+  body.light input.form-control{background:#fff;color:#111;border:1px solid #ddd}
+</style>
 </head>
-<body class="dark">
-  <header>
-    <div class="title">
-      <img src="logo.png" alt="Logo">
-      <div>
-        <div>Nama Konter</div>
-        <small>Status: Offline</small>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <button class="btn-ghost" id="openSidebarBtn" title="Menu">☰</button>
+  <div class="brand">
+    <img id="brandLogo" src="logo.png" alt="logo" onerror="this.style.display='none'">
+    <div>
+      <div class="title">Nama Konter</div>
+      <div class="sub small-muted">Offline · localStorage</div>
+    </div>
+  </div>
+  <div class="header-actions">
+    <div class="status-pill" id="saldoMini">Saldo: Rp 0</div>
+    <button id="themeToggle" class="btn-ghost" title="Toggle theme">🌓</button>
+  </div>
+</div>
+
+<!-- SIDEBAR -->
+<div id="sidebar" style="position:fixed;left:-320px;top:0;height:100%;width:320px;background:#060606;padding:18px;transition:0.25s;z-index:2000;overflow:auto">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div style="font-weight:700;color:#fff">Menu</div>
+    <button class="btn-ghost" id="closeSidebar">✕</button>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <button class="btn-ghost" onclick="showSection('transaksi'); closeSidebar()">Transaksi</button>
+    <button class="btn-ghost" onclick="showSection('history'); closeSidebar()">History</button>
+    <button class="btn-ghost" onclick="showSection('rekap'); closeSidebar()">Rekap</button>
+    <hr style="border:0;border-top:1px solid #222;margin:8px 0">
+    <button class="btn-ghost" onclick="showSection('pemasukan'); closeSidebar()">Pemasukan</button>
+    <button class="btn-ghost" onclick="showSection('pengeluaran'); closeSidebar()">Pengeluaran</button>
+    <button class="btn-ghost" onclick="showSection('saldo'); closeSidebar()">Saldo Akun</button>
+    <button class="btn-ghost" onclick="showSection('stok'); closeSidebar()">Stok Barang</button>
+    <button class="btn-ghost" onclick="showSection('hutang'); closeSidebar()">Hutang / Piutang</button>
+    <button class="btn-ghost" onclick="showSection('audit'); closeSidebar()">Audit Stok</button>
+    <button class="btn-ghost" onclick="showSection('pengaturan'); closeSidebar()">Pengaturan</button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main class="container">
+
+  <!-- TRANSAKSI -->
+  <section id="transaksi" class="page-section active">
+    <div class="card-ui">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4 style="margin:0">Transaksi</h4>
+        <div class="chip small-muted">Mode: POS</div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label class="small">Kategori</label>
+        <select id="kategoriTrans" class="form-control">
+          <option value="Barang">Barang / Aksesoris</option>
+          <option value="Pulsa">Pulsa</option>
+          <option value="Kuota">Kuota</option>
+          <option value="PPOB">PPOB</option>
+          <option value="E-Money">E-Money</option>
+          <option value="Transfer">Transfer</option>
+          <option value="TarikTunai">Tarik Tunai</option>
+        </select>
+
+        <label class="small">Pilih Produk (untuk barang)</label>
+        <select id="pilihProduk" class="form-control"></select>
+
+        <label class="small">Nama / Keterangan</label>
+        <input id="namaProduk" class="form-control" placeholder="Nama Produk atau keterangan">
+
+        <div style="display:flex;gap:8px">
+          <div style="flex:1">
+            <label class="small">Harga Beli (Rp)</label>
+            <input id="hargaBeli" type="number" class="form-control" value="0">
+          </div>
+          <div style="flex:1">
+            <label class="small">Harga Jual (Rp)</label>
+            <input id="hargaJual" type="number" class="form-control" value="0">
+          </div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:6px">
+          <div style="flex:1">
+            <label class="small">Laba (Rp)</label>
+            <input id="laba" type="number" class="form-control" readonly>
+          </div>
+          <div style="flex:1">
+            <label class="small">Jumlah</label>
+            <input id="qty" type="number" class="form-control" value="1" min="1">
+          </div>
+        </div>
+
+        <label class="small">Pilih Akun</label>
+        <select id="akunTransaksi" class="form-control"></select>
+
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="btn-accent flex-fill" onclick="simpanTransaksi()">💾 Simpan Penjualan</button>
+          <button class="btn-ghost flex-fill" onclick="bersihkanForm()">Bersihkan</button>
+        </div>
       </div>
     </div>
-    <div>
-      <button onclick="toggleMenu()">☰</button>
-      <button onclick="toggleTheme()">🌙</button>
+  </section>
+
+  <!-- HISTORY -->
+  <section id="history" class="page-section">
+    <div class="card-ui">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4 style="margin:0">History</h4>
+        <div>
+          <button class="btn-ghost" onclick="exportCSV()">Export CSV</button>
+          <button class="btn-ghost" onclick="downloadJSON()">Backup JSON</button>
+        </div>
+      </div>
+
+      <div style="margin-top:10px">
+        <label class="small">Filter Tanggal</label>
+        <input id="filterDate" type="date" class="form-control">
+        <label class="small">Cari</label>
+        <input id="searchHistory" class="form-control" placeholder="cari nama / akun">
+      </div>
+
+      <ul id="historyList" style="margin-top:12px"></ul>
     </div>
-  </header>
+  </section>
 
-  <div id="burgerMenu">
-    <a href="#" onclick="showPage('pemasukan')">Pemasukan</a>
-    <a href="#" onclick="showPage('pengeluaran')">Pengeluaran</a>
-    <a href="#" onclick="showPage('saldo')">Saldo Bank</a>
-    <a href="#" onclick="showPage('stok')">Stok Barang</a>
-    <a href="#" onclick="showPage('hutang')">Hutang Piutang</a>
-    <a href="#" onclick="showPage('audit')">Audit Stok</a>
-    <a href="#" onclick="showPage('pengaturan')">Pengaturan</a>
-  </div>
+  <!-- REKAP -->
+  <section id="rekap" class="page-section">
+    <div class="card-ui">
+      <h4>Rekap</h4>
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:10px">
+        <div style="flex:1;min-width:160px">
+          <div class="small-muted">Omzet</div>
+          <div id="rekapOmzet" style="font-weight:700">Rp 0</div>
+        </div>
+        <div style="flex:1;min-width:160px">
+          <div class="small-muted">Total Laba</div>
+          <div id="rekapLaba" style="font-weight:700">Rp 0</div>
+        </div>
+        <div style="flex:1;min-width:160px">
+          <div class="small-muted">Nilai Persediaan</div>
+          <div id="nilaiPersediaan" style="font-weight:700">Rp 0</div>
+        </div>
+        <div style="flex:1;min-width:160px">
+          <div class="small-muted">Total Saldo</div>
+          <div id="rekapSaldo" style="font-weight:700">Rp 0</div>
+        </div>
+      </div>
 
-  <main>
-    <!-- Transaksi -->
-    <section id="transaksi">
-      <h2>Transaksi</h2>
-      <input id="nama" class="form-control" placeholder="Nama Produk">
-      <input id="hargaBeli" type="number" class="form-control" placeholder="Harga Beli (Rp)">
-      <input id="hargaJual" type="number" class="form-control" placeholder="Harga Jual (Rp)">
-      <input id="laba" type="number" class="form-control" placeholder="Laba" readonly>
-      <select id="akun" class="form-control"></select>
-      <button class="btn btn-primary" onclick="simpanTransaksi()">Simpan</button>
-      <button class="btn btn-secondary" onclick="resetForm()">Bersihkan</button>
-    </section>
-
-    <!-- History -->
-    <section id="history" style="display:none">
-      <h2>History</h2>
-      <ul id="historyList"></ul>
-    </section>
-
-    <!-- Rekap -->
-    <section id="rekap" style="display:none">
-      <h2>Rekap</h2>
-      <p>Omzet: Rp <span id="rekapOmzet">0</span></p>
-      <p>Total Laba: Rp <span id="rekapLaba">0</span></p>
+      <hr style="border:0;border-top:1px solid #222;margin:12px 0">
+      <h6>Saldo Per Akun</h6>
       <ul id="akunList"></ul>
-    </section>
+    </div>
+  </section>
 
-    <!-- Pemasukan -->
-    <section id="pemasukan" style="display:none">
-      <h2>Pemasukan</h2>
-      <input id="namaPemasukan" class="form-control" placeholder="Nama Pemasukan">
+  <!-- PEMASUKAN -->
+  <section id="pemasukan" class="page-section">
+    <div class="card-ui">
+      <h4>Pemasukan Manual</h4>
+      <input id="namaPemasukan" class="form-control" placeholder="Sumber pemasukan">
       <input id="jumlahPemasukan" type="number" class="form-control" placeholder="Jumlah (Rp)">
+      <label class="small">Pilih Akun</label>
       <select id="akunPemasukan" class="form-control"></select>
-      <button class="btn btn-primary" onclick="tambahPemasukan()">Simpan</button>
-    </section>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-accent flex-fill" onclick="tambahPemasukan()">Simpan Pemasukan</button>
+      </div>
+    </div>
+  </section>
 
-    <!-- Pengeluaran -->
-    <section id="pengeluaran" style="display:none">
-      <h2>Pengeluaran</h2>
-      <input id="namaPengeluaran" class="form-control" placeholder="Nama Pengeluaran">
+  <!-- PENGELUARAN -->
+  <section id="pengeluaran" class="page-section">
+    <div class="card-ui">
+      <h4>Pengeluaran Manual</h4>
+      <input id="namaPengeluaran" class="form-control" placeholder="Jenis pengeluaran">
       <input id="jumlahPengeluaran" type="number" class="form-control" placeholder="Jumlah (Rp)">
+      <label class="small">Pilih Akun</label>
       <select id="akunPengeluaran" class="form-control"></select>
-      <button class="btn btn-primary" onclick="tambahPengeluaran()">Simpan</button>
-    </section>
-  </main>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-accent flex-fill" onclick="tambahPengeluaran()">Simpan Pengeluaran</button>
+      </div>
+    </div>
+  </section>
 
-  <nav class="bottom">
-    <button onclick="showPage('transaksi')" class="active">Transaksi</button>
-    <button onclick="showPage('history')">History</button>
-    <button onclick="showPage('rekap')">Rekap</button>
-  </nav>
+  <!-- SALDO AKUN -->
+  <section id="saldo" class="page-section">
+    <div class="card-ui">
+      <h4>Saldo Akun</h4>
+      <table class="table">
+        <thead><tr><th>Akun</th><th>Saldo</th><th>Opsi</th></tr></thead>
+        <tbody id="saldoTable"></tbody>
+      </table>
+      <input id="namaAkunBaru" class="form-control" placeholder="Nama Akun (unik)">
+      <input id="saldoAwal" type="number" class="form-control" placeholder="Tambah saldo (Rp)">
+      <div style="display:flex;gap:8px">
+        <button class="btn-accent flex-fill" onclick="tambahAtauTambahSaldo()">Tambah / Isi Saldo</button>
+      </div>
+    </div>
+  </section>
 
-  <script>
-    let data = JSON.parse(localStorage.getItem("kasirData")) || {
-      transaksi: [],
-      akun: [{ nama:"Cash", saldo:0 }],
-      omzet:0,
-      labaTotal:0,
-      stok:[], hutang:[]
-    };
+  <!-- STOK -->
+  <section id="stok" class="page-section">
+    <div class="card-ui">
+      <h4>Stok Barang</h4>
+      <table class="table">
+        <thead><tr><th>Nama</th><th>Stok</th><th>Harga Beli</th><th>Harga Jual</th><th>Aksi</th></tr></thead>
+        <tbody id="stokTable"></tbody>
+      </table>
+      <input id="namaBarang" class="form-control" placeholder="Nama barang">
+      <input id="stokJumlah" type="number" class="form-control" placeholder="Jumlah">
+      <input id="stokHargaBeli" type="number" class="form-control" placeholder="Harga Beli">
+      <input id="stokHargaJual" type="number" class="form-control" placeholder="Harga Jual">
+      <div style="display:flex;gap:8px">
+        <button class="btn-accent flex-fill" onclick="tambahStok()">Tambah Barang</button>
+      </div>
+    </div>
+  </section>
 
-    function save(){ localStorage.setItem("kasirData", JSON.stringify(data)); }
-    function toggleMenu(){ document.getElementById("burgerMenu").classList.toggle("active"); }
-    function toggleTheme(){
-      document.body.classList.toggle("light");
-      document.body.classList.toggle("dark");
-    }
-    function showPage(page){
-      document.querySelectorAll("main section").forEach(s=>s.style.display="none");
-      document.getElementById(page).style.display="block";
-      document.querySelectorAll("nav.bottom button").forEach(b=>b.classList.remove("active"));
-      document.querySelector(`nav.bottom button[onclick="showPage('${page}')"]`)?.classList.add("active");
-      if(page==="history") renderHistory();
-      if(page==="rekap") renderRekap();
-    }
-    function resetForm(){
-      document.getElementById("nama").value="";
-      document.getElementById("hargaBeli").value=0;
-      document.getElementById("hargaJual").value=0;
-      document.getElementById("laba").value=0;
-    }
-    function hitungLabaInput(){
-      let beli=parseInt(document.getElementById("hargaBeli").value)||0;
-      let jual=parseInt(document.getElementById("hargaJual").value)||0;
-      document.getElementById("laba").value=jual-beli;
-    }
-    document.getElementById("hargaBeli").addEventListener("input",hitungLabaInput);
-    document.getElementById("hargaJual").addEventListener("input",hitungLabaInput);
+  <!-- HUTANG / PIUTANG -->
+  <section id="hutang" class="page-section">
+    <div class="card-ui">
+      <h4>Hutang / Piutang</h4>
+      <table class="table">
+        <thead><tr><th>Nama</th><th>Jumlah</th><th>Tipe</th><th>Aksi</th></tr></thead>
+        <tbody id="hutangTable"></tbody>
+      </table>
+      <input id="namaHutang" class="form-control" placeholder="Nama">
+      <input id="jumlahHutang" type="number" class="form-control" placeholder="Jumlah (Rp)">
+      <select id="tipeHutang" class="form-control"><option>Hutang</option><option>Piutang</option></select>
+      <button class="btn-accent flex-fill" onclick="tambahHutang()">Tambah</button>
+    </div>
+  </section>
 
-    function simpanTransaksi(){
-      let nama=document.getElementById("nama").value;
-      let beli=parseInt(document.getElementById("hargaBeli").value)||0;
-      let jual=parseInt(document.getElementById("hargaJual").value)||0;
-      let laba=jual-beli;
-      let akunIdx=document.getElementById("akun").selectedIndex;
-      let akun=data.akun[akunIdx].nama;
-      let t={ nama,hargaBeli:beli,hargaJual:jual,laba,akun,tanggal:new Date().toLocaleString() };
-      data.transaksi.push(t);
-      data.omzet+=jual;
-      data.labaTotal+=laba;
-      data.akun[akunIdx].saldo+=jual-beli;
-      save(); resetForm();
-      alert("Transaksi tersimpan");
-    }
+  <!-- AUDIT -->
+  <section id="audit" class="page-section">
+    <div class="card-ui">
+      <h4>Audit Stok</h4>
+      <p class="small-muted">Masukkan stok fisik yang terhitung lalu bandingkan</p>
+      <div id="auditInputs"></div>
+      <button class="btn-accent" onclick="simpanAudit()">Simpan Audit & Bandingkan</button>
+      <div id="auditResult" style="margin-top:12px;color:var(--muted)"></div>
+    </div>
+  </section>
 
-    function tambahPemasukan(){
-      let nama=document.getElementById("namaPemasukan").value;
-      let jumlah=parseInt(document.getElementById("jumlahPemasukan").value)||0;
-      let akunIdx=document.getElementById("akunPemasukan").selectedIndex;
-      let akun=data.akun[akunIdx].nama;
-      let t={ nama,hargaBeli:0,hargaJual:jumlah,laba:jumlah,akun,tanggal:new Date().toLocaleString() };
-      data.transaksi.push(t);
-      data.omzet+=jumlah;
-      data.labaTotal+=jumlah;
-      data.akun[akunIdx].saldo+=jumlah;
-      save();
-      alert("Pemasukan tersimpan");
-    }
+  <!-- PENGATURAN -->
+  <section id="pengaturan" class="page-section">
+    <div class="card-ui">
+      <h4>Pengaturan</h4>
+      <label class="small">Catatan untuk print/share</label>
+      <textarea id="catatanPengaturan" class="form-control" rows="2" placeholder="Alamat / Nomor HP / Catatan"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn-ghost" onclick="printHistory()">Print</button>
+        <button class="btn-ghost" onclick="shareTXT()">Share TXT</button>
+        <button class="btn-ghost" onclick="sharePNG()">Share PNG</button>
+        <button class="btn-ghost" onclick="downloadJSON()">Backup JSON</button>
+        <button class="btn-ghost" onclick="exportCSV()">Export CSV</button>
+      </div>
+      <hr style="border:0;border-top:1px solid #222;margin:12px 0">
+      <button class="btn-ghost" onclick="resetData()">Reset Semua Data</button>
+    </div>
+  </section>
 
-    function tambahPengeluaran(){
-      let nama=document.getElementById("namaPengeluaran").value;
-      let jumlah=parseInt(document.getElementById("jumlahPengeluaran").value)||0;
-      let akunIdx=document.getElementById("akunPengeluaran").selectedIndex;
-      let akun=data.akun[akunIdx].nama;
-      let t={ nama,hargaBeli:jumlah,hargaJual:0,laba:-jumlah,akun,tanggal:new Date().toLocaleString() };
-      data.transaksi.push(t);
-      data.labaTotal-=jumlah;
-      data.akun[akunIdx].saldo-=jumlah;
-      save();
-      alert("Pengeluaran tersimpan");
-    }
+</main>
 
-    function renderHistory(){
-      let ul=document.getElementById("historyList"); ul.innerHTML="";
-      data.transaksi.slice().reverse().forEach(t=>{
-        let li=document.createElement("li");
-        li.textContent=`${t.tanggal} | ${t.nama} | Jual Rp${t.hargaJual} | Beli Rp${t.hargaBeli} | Laba Rp${t.laba} (${t.akun})`;
-        ul.appendChild(li);
-      });
-    }
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <div class="nav-grid">
+    <div class="nav-item" onclick="showSection('stok')"><div style="font-size:18px">📦</div><div>Stok</div></div>
+    <div class="nav-item active" onclick="showSection('transaksi')"><div style="font-size:18px">💳</div><div>Transaksi</div></div>
+    <div class="nav-item" onclick="showSection('history')"><div style="font-size:18px">📜</div><div>History</div></div>
+    <div class="nav-item" onclick="showSection('rekap')"><div style="font-size:18px">📊</div><div>Rekap</div></div>
+  </div>
+</nav>
 
-    function renderRekap(){
-      document.getElementById("rekapOmzet").textContent=data.omzet;
-      document.getElementById("rekapLaba").textContent=data.labaTotal;
-      let ul=document.getElementById("akunList"); ul.innerHTML="";
-      data.akun.forEach(a=>{
-        let li=document.createElement("li");
-        li.textContent=`${a.nama}: Rp${a.saldo}`;
-        ul.appendChild(li);
-      });
-    }
+<!-- libs -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-    function renderAkun(){
-      let sel=document.getElementById("akun"); sel.innerHTML="";
-      let sel2=document.getElementById("akunPemasukan"); sel2.innerHTML="";
-      let sel3=document.getElementById("akunPengeluaran"); sel3.innerHTML="";
-      data.akun.forEach(a=>{
-        let opt=document.createElement("option"); opt.textContent=a.nama;
-        let opt2=opt.cloneNode(true);
-        let opt3=opt.cloneNode(true);
-        sel.appendChild(opt); sel2.appendChild(opt2); sel3.appendChild(opt3);
-      });
-    }
+<!-- APP LOGIC (all-in-one) -->
+<script>
+/* Data structure - preserve old keys and extend */
+const KEY = 'sgkasir_full_v1';
+let data = JSON.parse(localStorage.getItem(KEY)) || {
+  akun: [{ id:'acc_0', nama: 'Cash', saldo: 0 }],
+  transaksi: [], pemasukan: [], pengeluaran: [], stok: [], hutang: [], audit: [], note: '', omzet:0, labaTotal:0
+};
 
-    renderAkun();
-  </script>
+function save(){ localStorage.setItem(KEY, JSON.stringify(data)); renderAll(); }
+function uid(p='id'){ return p + Date.now().toString(36); }
+function now(){ return new Date().toLocaleString(); }
+function fmt(n){ return Number(n||0).toLocaleString('id-ID'); }
+function findAkunByName(n){ return data.akun.find(a=>a.nama.toLowerCase()===n.toLowerCase()) || null; }
+function findStokByName(n){ return data.stok.find(s=>s.nama.toLowerCase()===n.toLowerCase()) || null; }
+
+/* Sidebar open/close */
+const sidebar = document.getElementById('sidebar');
+document.getElementById('openSidebarBtn').onclick = ()=> sidebar.style.left='0';
+document.getElementById('closeSidebar').onclick = ()=> sidebar.style.left='-320px';
+function closeSidebar(){ sidebar.style.left='-320px'; }
+
+/* Section show */
+function showSection(id){
+  document.querySelectorAll('.page-section').forEach(s=>s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+  // update nav active
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  const navMap = {'stok':0,'transaksi':1,'history':2,'rekap':3};
+  const idx = navMap[id];
+  if(idx!==undefined) document.querySelectorAll('.nav-item')[idx].classList.add('active');
+  // render targeted pieces
+  if(id==='history') renderHistory();
+  if(id==='rekap') renderRekap();
+  if(id==='stok') renderStokTable();
+  if(id==='saldo') renderSaldoTable();
+  if(id==='hutang') renderHutangTable();
+  if(id==='audit') renderAuditInputs();
+}
+
+/* THEME */
+(function initTheme(){
+  const t = localStorage.getItem(KEY + '_theme');
+  if(t==='light') document.body.classList.add('light');
+  document.getElementById('themeToggle').addEventListener('click', ()=>{
+    document.body.classList.toggle('light');
+    if(document.body.classList.contains('light')) localStorage.setItem(KEY + '_theme','light'); else localStorage.removeItem(KEY + '_theme');
+  });
+})();
+
+/* RENDER ALL */
+function renderAll(){
+  renderAkunSelects();
+  renderProdukSelect();
+  renderHistory();
+  renderRekap();
+  renderStokTable();
+  renderHutangTable();
+  renderSaldoTable();
+  renderAuditInputs();
+  renderMiniSaldo();
+  // persist note text area
+  document.getElementById('catatanPengaturan').value = data.note || '';
+}
+function renderMiniSaldo(){
+  const total = data.akun.reduce((s,a)=>s+(a.saldo||0),0);
+  document.getElementById('saldoMini').textContent = 'Saldo: Rp ' + fmt(total);
+}
+
+/* AKUN */
+function renderAkunSelects(){
+  const selIds = ['akunTransaksi','akunPemasukan','akunPengeluaran','akunPemasukan','akunPengeluaran','akunPemasukan'];
+  const uniq = Array.from(new Set(selIds));
+  uniq.forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.innerHTML='';
+    data.akun.forEach(a=>{
+      const opt = document.createElement('option'); opt.value = a.id; opt.textContent = `${a.nama} (Rp ${fmt(a.saldo)})`;
+      el.appendChild(opt);
+    });
+  });
+}
+function renderSaldoTable(){
+  const tbody = document.getElementById('saldoTable'); if(!tbody) return; tbody.innerHTML='';
+  data.akun.forEach(a=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${a.nama}</td><td>Rp ${fmt(a.saldo)}</td>
+      <td>
+        <button class="btn-ghost" onclick="editAkun('${a.id}')">Edit</button>
+        <button class="btn-ghost" onclick="hapusAkun('${a.id}')">Hapus</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+function tambahAtauTambahSaldo(){
+  const nama = document.getElementById('namaAkunBaru').value.trim();
+  const tambah = parseInt(document.getElementById('saldoAwal').value)||0;
+  if(!nama) return alert('Isi nama akun');
+  const existing = findAkunByName(nama);
+  if(existing){
+    existing.saldo += tambah;
+    save();
+    alert('Akun sudah ada. Saldo ditambahkan.');
+  } else {
+    data.akun.push({ id: uid('acc_'), nama, saldo: tambah });
+    save();
+    alert('Akun baru ditambahkan.');
+  }
+  document.getElementById('namaAkunBaru').value=''; document.getElementById('saldoAwal').value='';
+}
+function editAkun(id){
+  const a = data.akun.find(x=>x.id===id); if(!a) return;
+  const nama = prompt('Ubah nama akun', a.nama);
+  if(nama) a.nama = nama;
+  const s = prompt('Atur saldo (angka, kosong = tidak berubah)', String(a.saldo));
+  if(s!==null && s!=='' && !isNaN(parseInt(s))) a.saldo = parseInt(s);
+  save();
+}
+function hapusAkun(id){
+  if(!confirm('Hapus akun?')) return;
+  data.akun = data.akun.filter(a=>a.id!==id);
+  save();
+}
+
+/* STOK */
+function renderProdukSelect(){
+  const sel = document.getElementById('pilihProduk'); if(!sel) return;
+  sel.innerHTML = '<option value="">-- pilih produk (opsional) --</option>';
+  data.stok.forEach(s=> sel.insertAdjacentHTML('beforeend', `<option value="${s.id}">${s.nama} • Stok:${s.jumlah}</option>`));
+}
+function renderStokTable(){
+  const tb = document.getElementById('stokTable'); if(!tb) return; tb.innerHTML='';
+  data.stok.forEach(s=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.nama}</td><td>${s.jumlah}</td><td>Rp ${fmt(s.hargaBeli)}</td><td>Rp ${fmt(s.hargaJual)}</td>
+      <td>
+        <button class="btn-ghost" onclick="editStok('${s.id}')">Edit</button>
+        <button class="btn-ghost" onclick="hapusStok('${s.id}')">Hapus</button>
+      </td>`;
+    tb.appendChild(tr);
+  });
+}
+function tambahStok(){
+  const nama = document.getElementById('namaBarang').value.trim();
+  const jumlah = parseInt(document.getElementById('stokJumlah').value)||0;
+  const hb = parseInt(document.getElementById('stokHargaBeli').value)||0;
+  const hj = parseInt(document.getElementById('stokHargaJual').value)||0;
+  if(!nama||jumlah<=0) return alert('Isi nama & jumlah stok dengan benar');
+  const exists = findStokByName(nama);
+  if(exists){
+    exists.jumlah += jumlah;
+    exists.hargaBeli = hb || exists.hargaBeli;
+    exists.hargaJual = hj || exists.hargaJual;
+  } else {
+    data.stok.unshift({ id: uid('s_'), nama, jumlah, hargaBeli:hb, hargaJual:hj });
+  }
+  save();
+  document.getElementById('namaBarang').value=''; document.getElementById('stokJumlah').value=''; document.getElementById('stokHargaBeli').value=''; document.getElementById('stokHargaJual').value='';
+}
+function editStok(id){
+  const s = data.stok.find(x=>x.id===id); if(!s) return;
+  const nama = prompt('Ubah nama', s.nama);
+  const j = prompt('Jumlah', String(s.jumlah));
+  const hb = prompt('Harga Beli', String(s.hargaBeli));
+  const hj = prompt('Harga Jual', String(s.hargaJual));
+  if(nama) s.nama = nama;
+  if(!isNaN(parseInt(j))) s.jumlah = parseInt(j);
+  if(!isNaN(parseInt(hb))) s.hargaBeli = parseInt(hb);
+  if(!isNaN(parseInt(hj))) s.hargaJual = parseInt(hj);
+  save();
+}
+function hapusStok(id){
+  if(!confirm('Hapus barang?')) return;
+  data.stok = data.stok.filter(s=>s.id!==id); save();
+}
+
+/* HUTANG */
+function renderHutangTable(){
+  const tb = document.getElementById('hutangTable'); if(!tb) return; tb.innerHTML='';
+  data.hutang.forEach(h=>{
+    tb.insertAdjacentHTML('beforeend', `<tr><td>${h.nama}</td><td>Rp ${fmt(h.jumlah)}</td><td>${h.tipe}</td>
+      <td><button class="btn-ghost" onclick="editHutang('${h.id}')">Edit</button><button class="btn-ghost" onclick="hapusHutang('${h.id}')">Hapus</button></td></tr>`);
+  });
+}
+function tambahHutang(){
+  const nama = document.getElementById('namaHutang').value.trim();
+  const jumlah = parseInt(document.getElementById('jumlahHutang').value)||0;
+  const tipe = document.getElementById('tipeHutang').value;
+  if(!nama||jumlah<=0) return alert('Isi data hutang/piutang valid');
+  data.hutang.unshift({ id: uid('h_'), nama, jumlah, tipe });
+  save();
+  document.getElementById('namaHutang').value=''; document.getElementById('jumlahHutang').value='';
+}
+function editHutang(id){
+  const h = data.hutang.find(x=>x.id===id); if(!h) return;
+  const nama = prompt('Ubah nama', h.nama);
+  const j = prompt('Jumlah', String(h.jumlah));
+  const tipe = prompt('Tipe (Hutang/Piutang)', h.tipe);
+  if(nama) h.nama = nama; if(!isNaN(parseInt(j))) h.jumlah = parseInt(j); if(tipe) h.tipe = tipe;
+  save();
+}
+function hapusHutang(id){ if(!confirm('Hapus?')) return; data.hutang = data.hutang.filter(x=>x.id!==id); save(); }
+
+/* AUDIT */
+function renderAuditInputs(){
+  const wrap = document.getElementById('auditInputs'); if(!wrap) return; wrap.innerHTML='';
+  data.stok.forEach(s=>{
+    const id = 'audit_'+s.id;
+    wrap.insertAdjacentHTML('beforeend', `<label class="small">${s.nama} (sistem: ${s.jumlah})</label><input id="${id}" class="form-control" type="number" value="${s.jumlah}">`);
+  });
+}
+function simpanAudit(){
+  const inputs = document.querySelectorAll('[id^="audit_"]');
+  const result=[];
+  inputs.forEach(inp=>{
+    const sid = inp.id.replace('audit_','');
+    const real = parseInt(inp.value)||0;
+    const s = data.stok.find(x=>x.id===sid);
+    if(s){
+      const diff = real - s.jumlah;
+      result.push(`${s.nama}: sistem=${s.jumlah} fisik=${real} selisih=${diff}`);
+    }
+  });
+  document.getElementById('auditResult').innerText = result.join('\\n') || 'Tidak ada barang';
+  alert('Audit selesai. Lihat hasil di panel Audit.');
+}
+
+/* TRANSAKSI (preserve existing logic, extend) */
+function onKategoriChange(){
+  const k = document.getElementById('kategoriTrans').value;
+  if(k==='Barang') document.getElementById('pilihProduk').style.display='block'; else document.getElementById('pilihProduk').style.display='block';
+}
+document.getElementById('kategoriTrans').addEventListener('change', onKategoriChange);
+
+function bersihkanForm(){
+  ['namaProduk','hargaBeli','hargaJual','laba','qty'].forEach(id=>{ const el=document.getElementById(id); if(el) el.value = (el.type==='number' ? 0 : ''); });
+  document.getElementById('qty').value = 1;
+}
+function hitungLabaInput(){
+  const beli = parseInt(document.getElementById('hargaBeli').value)||0;
+  const jual = parseInt(document.getElementById('hargaJual').value)||0;
+  document.getElementById('laba').value = jual - beli;
+}
+document.getElementById('hargaBeli').addEventListener('input', hitungLabaInput);
+document.getElementById('hargaJual').addEventListener('input', hitungLabaInput);
+
+function simpanTransaksi(){
+  const kategori = document.getElementById('kategoriTrans').value;
+  const produkId = document.getElementById('pilihProduk').value;
+  const nama = document.getElementById('namaProduk').value || (produkId? (data.stok.find(s=>s.id===produkId)?.nama || '') : '');
+  const hargaBeli = parseInt(document.getElementById('hargaBeli').value)||0;
+  const hargaJual = parseInt(document.getElementById('hargaJual').value)||0;
+  const qty = parseInt(document.getElementById('qty').value)||1;
+  const laba = (hargaJual - hargaBeli) * qty;
+  const akunId = document.getElementById('akunTransaksi').value;
+  const akun = data.akun.find(a=>a.id===akunId) || data.akun[0];
+
+  if(!nama || hargaJual<=0) return alert('Lengkapi data transaksi (nama & harga jual > 0)');
+
+  // stok reduce if produk selected
+  if(produkId){
+    const s = data.stok.find(x=>x.id===produkId);
+    if(s){
+      if(s.jumlah < qty) return alert('Stok tidak cukup');
+      s.jumlah -= qty;
+    }
+  }
+
+  const tx = { id: uid('tx_'), tanggal: now(), kategori, nama, hargaBeli, hargaJual, qty, laba, akun: akun.nama };
+  data.transaksi.unshift(tx);
+  // update finansial
+  data.omzet += hargaJual * qty;
+  data.labaTotal += laba;
+  akun.saldo += (hargaJual * qty);
+  save();
+  bersihkanForm();
+  alert('Transaksi tersimpan');
+}
+
+/* PEMASUKAN / PENGELUARAN */
+function tambahPemasukan(){
+  const nama = document.getElementById('namaPemasukan').value || 'Pemasukan';
+  const jumlah = parseInt(document.getElementById('jumlahPemasukan').value)||0;
+  const akunId = document.getElementById('akunPemasukan').value;
+  const akun = data.akun.find(a=>a.id===akunId) || data.akun[0];
+  if(jumlah<=0) return alert('Jumlah tidak valid');
+  const item = { id: uid('in_'), tanggal: now(), jenis:'Pemasukan', nama, jumlah, hargaBeli:0, hargaJual:jumlah, laba:jumlah, akun: akun.nama };
+  data.pemasukan.unshift(item);
+  data.transaksi.unshift({ id: uid('tx_'), tanggal: now(), kategori:'Pemasukan', nama, hargaBeli:0, hargaJual:jumlah, qty:1, laba:jumlah, akun: akun.nama});
+  data.omzet += jumlah; data.labaTotal += jumlah; akun.saldo += jumlah;
+  save(); alert('Pemasukan tersimpan'); document.getElementById('namaPemasukan').value=''; document.getElementById('jumlahPemasukan').value='';
+}
+function tambahPengeluaran(){
+  const nama = document.getElementById('namaPengeluaran').value || 'Pengeluaran';
+  const jumlah = parseInt(document.getElementById('jumlahPengeluaran').value)||0;
+  const akunId = document.getElementById('akunPengeluaran').value;
+  const akun = data.akun.find(a=>a.id===akunId) || data.akun[0];
+  if(jumlah<=0) return alert('Jumlah tidak valid');
+  const item = { id: uid('out_'), tanggal: now(), jenis:'Pengeluaran', nama, jumlah, hargaBeli:jumlah, hargaJual:0, laba:-jumlah, akun: akun.nama };
+  data.pengeluaran.unshift(item);
+  data.transaksi.unshift({ id: uid('tx_'), tanggal: now(), kategori:'Pengeluaran', nama, hargaBeli:jumlah, hargaJual:0, qty:1, laba:-jumlah, akun: akun.nama});
+  data.labaTotal -= jumlah; akun.saldo -= jumlah;
+  save(); alert('Pengeluaran tersimpan'); document.getElementById('namaPengeluaran').value=''; document.getElementById('jumlahPengeluaran').value='';
+}
+
+/* HISTORY & REKAP */
+function renderHistory(){
+  const ul = document.getElementById('historyList'); if(!ul) return; ul.innerHTML='';
+  let list = data.transaksi.slice();
+  const filterDate = document.getElementById('filterDate')?.value;
+  const q = document.getElementById('searchHistory')?.value?.toLowerCase() || '';
+  if(filterDate){
+    list = list.filter(t => new Date(t.tanggal).toISOString().slice(0,10) === filterDate);
+  }
+  if(q){
+    list = list.filter(t => (t.nama||'').toLowerCase().includes(q) || (t.akun||'').toLowerCase().includes(q));
+  }
+  list.forEach(t=>{
+    const li = document.createElement('li');
+    li.innerHTML = `<div style="display:flex;justify-content:space-between"><div style="font-weight:700">${t.nama}</div>
+      <div class="small-muted">${t.tanggal}</div></div>
+      <div style="margin-top:6px">Kategori: ${t.kategori||t.jenis||'-'} • Jual: Rp ${fmt((t.hargaJual||t.harga)||0)} • Beli: Rp ${fmt((t.hargaBeli||0))} • Qty: ${t.qty||1} • Laba: Rp ${fmt(t.laba||0)} • Akun: ${t.akun||''}</div>
+      <div style="margin-top:8px"><button class="btn-ghost" onclick="editTransaksi('${t.id}')">Edit</button> <button class="btn-ghost" onclick="hapusTransaksi('${t.id}')">Hapus</button></div>`;
+    ul.appendChild(li);
+  });
+}
+document.getElementById('filterDate')?.addEventListener('change', renderHistory);
+document.getElementById('searchHistory')?.addEventListener('input', renderHistory);
+
+function editTransaksi(id){
+  const t = data.transaksi.find(x=>x.id===id); if(!t) return;
+  const nama = prompt('Nama/keterangan', t.nama) || t.nama;
+  const hj = prompt('Harga Jual', String(t.hargaJual||t.harga||0));
+  const hb = prompt('Harga Beli', String(t.hargaBeli||0));
+  const qty = prompt('Qty', String(t.qty||1));
+  // update finansial minimal: adjust omzet & laba & akun saldo
+  const oldTotal = (t.hargaJual||t.harga||0) * (t.qty||1);
+  const newHJ = parseInt(hj)||0; const newHB = parseInt(hb)||0; const newQty = parseInt(qty)||1;
+  const newTotal = newHJ * newQty;
+  const oldLaba = t.laba||0;
+  const newLaba = (newHJ - newHB) * newQty;
+  // adjust aggregates
+  data.omzet += (newTotal - oldTotal);
+  data.labaTotal += (newLaba - oldLaba);
+  const akun = data.akun.find(a=>a.nama===t.akun);
+  if(akun){
+    akun.saldo += (newTotal - oldTotal);
+  }
+  t.nama = nama; t.hargaJual = newHJ; t.hargaBeli = newHB; t.qty = newQty; t.laba = newLaba;
+  save(); alert('Transaksi diperbarui');
+}
+function hapusTransaksi(id){
+  if(!confirm('Hapus transaksi ini?')) return;
+  const t = data.transaksi.find(x=>x.id===id);
+  if(!t) return;
+  const total = (t.hargaJual||t.harga||0) * (t.qty||1);
+  data.omzet -= total;
+  data.labaTotal -= (t.laba||0);
+  const akun = data.akun.find(a=>a.nama===t.akun);
+  if(akun) akun.saldo -= total;
+  // restore stok if barang
+  if(t.kategori==='Barang' && t.nama){
+    const s = findStokByName(t.nama);
+    if(s) s.jumlah += (t.qty||1);
+  }
+  data.transaksi = data.transaksi.filter(x=>x.id!==id);
+  save();
+}
+
+/* REKAP */
+function renderRekap(){
+  document.getElementById('rekapOmzet').textContent = 'Rp ' + fmt(data.omzet);
+  document.getElementById('rekapLaba').textContent = 'Rp ' + fmt(data.labaTotal);
+  const nilaiPers = data.stok.reduce((s,item)=> s + ((item.jumlah||0) * (item.hargaBeli||0)), 0);
+  document.getElementById('nilaiPersediaan').textContent = 'Rp ' + fmt(nilaiPers);
+  document.getElementById('rekapSaldo').textContent = 'Rp ' + fmt(data.akun.reduce((s,a)=> s + (a.saldo||0),0));
+  // akun list
+  const ul = document.getElementById('akunList'); ul.innerHTML='';
+  data.akun.forEach(a=> ul.insertAdjacentHTML('beforeend', `<li>${a.nama} • Rp ${fmt(a.saldo)}</li>`));
+}
+
+/* EXPORT / SHARE / PRINT */
+function exportCSV(){
+  const rows=[['Tanggal','Kategori','Nama','HargaJual','HargaBeli','Qty','Laba','Akun']];
+  data.transaksi.forEach(t=> rows.push([t.tanggal,t.kategori||t.jenis||'',t.nama,t.hargaJual||t.harga||0,t.hargaBeli||0,t.qty||1,t.laba||0,t.akun||'']));
+  data.pemasukan.forEach(p=> rows.push([p.tanggal,'Pemasukan',p.nama,p.jumlah,0,1,p.jumlah,p.akun||'']));
+  data.pengeluaran.forEach(q=> rows.push([q.tanggal,'Pengeluaran',q.nama,0,q.jumlah,1,-q.jumlah,q.akun||'']));
+  const csv = rows.map(r=> r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(',')).join('\\n');
+  const blob = new Blob([csv],{type:'text/csv'}); const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'history.csv'; a.click();
+}
+function downloadJSON(){
+  const blob = new Blob([JSON.stringify(data,null,2)],{type:'application/json'}); const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='sgkasir_backup.json'; a.click();
+}
+function printHistory(){
+  const note = document.getElementById('catatanPengaturan').value || data.note || '';
+  const w = window.open('','_blank','width=800,height=600');
+  w.document.write(`<pre>${note}\\n\\n${JSON.stringify(data,null,2)}</pre>`);
+  w.print(); w.close();
+}
+function shareTXT(){
+  const note = document.getElementById('catatanPengaturan').value || data.note || '';
+  let txt = note + '\\n\\n';
+  data.transaksi.forEach(t=> txt += `${t.tanggal} - ${t.nama} - Rp ${fmt(t.hargaJual||t.harga||0)} - Laba Rp ${fmt(t.laba||0)}\\n`);
+  const blob = new Blob([txt],{type:'text/plain'}); const url = URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='sgkasir.txt'; a.click();
+}
+function sharePNG(){
+  html2canvas(document.querySelector('main')).then(canvas=>{
+    canvas.toBlob(blob=>{
+      const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='sgkasir.png'; a.click();
+    });
+  });
+}
+
+/* RESET */
+function resetData(){
+  if(!confirm('Yakin reset semua data?')) return;
+  localStorage.removeItem(KEY); location.reload();
+}
+
+/* EDIT / HAPUS helpers for akun/stok/hutang already included with per-item buttons */
+
+/* INIT */
+window.addEventListener('load', ()=>{ renderAll(); showSection('transaksi'); });
+document.getElementById('catatanPengaturan').addEventListener('change', (e)=>{ data.note = e.target.value; save(); });
+
+/* expose global for HTML callbacks (safety) */
+window.showSection = showSection;
+window.simpanTransaksi = simpanTransaksi;
+window.bersihkanForm = bersihkanForm;
+window.tambahPemasukan = tambahPemasukan;
+window.tambahPengeluaran = tambahPengeluaran;
+window.tambahAtauTambahSaldo = tambahAtauTambahSaldo;
+window.tambahStok = tambahStok;
+window.tambahHutang = tambahHutang;
+window.simpanAudit = simpanAudit;
+window.exportCSV = exportCSV;
+window.downloadJSON = downloadJSON;
+window.printHistory = printHistory;
+window.shareTXT = shareTXT;
+window.sharePNG = sharePNG;
+window.resetData = resetData;
+window.editTransaksi = editTransaksi;
+window.hapusTransaksi = hapusTransaksi;
+window.editAkun = editAkun;
+window.hapusAkun = hapusAkun;
+window.editStok = editStok;
+window.hapusStok = hapusStok;
+window.editHutang = editHutang;
+window.hapusHutang = hapusHutang;
+
+/* small UX: when product selected autofill prices */
+document.getElementById('pilihProduk').addEventListener('change', function(){
+  const id = this.value;
+  if(!id) return;
+  const s = data.stok.find(x=>x.id===id);
+  if(s){
+    document.getElementById('namaProduk').value = s.nama;
+    document.getElementById('hargaBeli').value = s.hargaBeli||0;
+    document.getElementById('hargaJual').value = s.hargaJual||0;
+    hitungLabaInput();
+  }
+});
+
+/* end of script */
+</script>
 </body>
 </html>
